@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Hlídače PPC asistenta přes launchd (macOS). Jen čtou, v účtech nic nemění.
+  CESTA_K_APPCE nahraď absolutní cestou ke složce appky (všude, 5×).
+  Návod: deploy/launchd/README.md
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>cz.ppc-asistent.hlidac</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>CESTA_K_APPCE/.venv/bin/python</string>
+    <string>CESTA_K_APPCE/deploy/spust.py</string>
+    <string>--rezim</string>
+    <string>auto</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>CESTA_K_APPCE</string>
+
+  <!-- Časy jsou v časovém pásmu Macu. Weekday: 0 a 7 = neděle, 5 = pátek, 6 = sobota. -->
+  <key>StartCalendarInterval</key>
+  <array>
+    <!-- ráno denně 7:30: výkyvy + cíle + krycí plán -->
+    <dict><key>Hour</key><integer>7</integer><key>Minute</key><integer>30</integer></dict>
+    <!-- večer denně 19:05: utíká dnešek? -->
+    <dict><key>Hour</key><integer>19</integer><key>Minute</key><integer>5</integer></dict>
+    <!-- pátek 18:05: hlídač akcí -->
+    <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>18</integer><key>Minute</key><integer>5</integer></dict>
+    <!-- sobota a neděle 10:05: hlídač akcí na víkend -->
+    <dict><key>Weekday</key><integer>6</integer><key>Hour</key><integer>10</integer><key>Minute</key><integer>5</integer></dict>
+    <dict><key>Weekday</key><integer>0</integer><key>Hour</key><integer>10</integer><key>Minute</key><integer>5</integer></dict>
+  </array>
+
+  <key>StandardOutPath</key>
+  <string>CESTA_K_APPCE/reports/launchd-hlidac.log</string>
+  <key>StandardErrorPath</key>
+  <string>CESTA_K_APPCE/reports/launchd-hlidac.log</string>
+</dict>
+</plist>

@@ -1,0 +1,189 @@
+# Hlídače PPC asistenta v GitHub Actions (jen čtou, v účtech nic nemění).
+# Zkopíruj do .github/workflows/hlidac.yml ve svém PRIVÁTNÍM repu. Návod: deploy/github-actions/README.md
+#
+# Časy jsou v Europe/Prague díky poli `timezone` (GitHub ho v `schedule` podporuje).
+# Když by ti `timezone` nefungoval, smaž ho a přepiš časy do UTC:
+#   letní čas (CEST = UTC+2):  7:30 → '30 5 * * *', 19:05 → '5 17 * * *', pá 18:05 → '5 16 * * 5', so+ne 10:05 → '5 8 * * 0,6'
+#   zimní čas (CET  = UTC+1):  7:30 → '30 6 * * *', 19:05 → '5 18 * * *', pá 18:05 → '5 17 * * 5', so+ne 10:05 → '5 9 * * 0,6'
+#   (v UTC se při změně času běh posune o hodinu — dvakrát ročně ho přepiš, nebo to nech být)
+# Minuty nejsou na celou hodinu schválně: GitHub píše, že začátek každé hodiny je špička
+# a naplánované běhy se pak můžou zpozdit.
+
+name: Hlídač účtů
+
+on:
+  schedule:
+    - cron: '30 7 * * *'      # ráno: výkyvy + cíle + krycí plán
+      timezone: "Europe/Prague"
+    - cron: '5 19 * * *'      # večer: utíká dnešek?
+      timezone: "Europe/Prague"
+    - cron: '5 18 * * 5'      # pátek: hlídač akcí
+      timezone: "Europe/Prague"
+    - cron: '5 10 * * 0,6'    # sobota a neděle: hlídač akcí --vikend
+      timezone: "Europe/Prague"
+  workflow_dispatch:
+    inputs:
+      rezim:
+        description: "Který hlídač spustit"
+        type: choice
+        options: [rano, vecer, akce, vikend]
+        default: rano
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hlidac
+  cancel-in-progress: false
+
+jobs:
+  hlidac:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalace knihoven
+        run: pip install -r requirements.txt
+
+      - name: Režim podle plánu
+        id: rezim
+        env:
+          PLAN: ${{ github.event.schedule }}
+          RUCNE: ${{ github.event.inputs.rezim }}
+        run: |
+          case "$PLAN" in
+            "30 7 * * *")   R=rano ;;
+            "5 19 * * *")   R=vecer ;;
+            "5 18 * * 5")   R=akce ;;
+            "5 10 * * 0,6") R=vikend ;;
+            *)              R="${RUCNE:-rano}" ;;
+          esac
+          echo "rezim=$R" >> "$GITHUB_OUTPUT"
+          echo "Režim: $R"
+
+      # Klíče jdou ze Secrets do .env jen na dobu běhu. Hodnoty se nikde nevypisují
+      # (GitHub je v logu navíc maskuje). Prázdné secrets se přeskočí.
+      - name: Přístupy do .env (jen pro tento běh)
+        env:
+          GOOGLE_ADS_DEVELOPER_TOKEN: ${{ secrets.GOOGLE_ADS_DEVELOPER_TOKEN }}
+          GOOGLE_ADS_CLIENT_ID: ${{ secrets.GOOGLE_ADS_CLIENT_ID }}
+          GOOGLE_ADS_CLIENT_SECRET: ${{ secrets.GOOGLE_ADS_CLIENT_SECRET }}
+          GOOGLE_ADS_REFRESH_TOKEN: ${{ secrets.GOOGLE_ADS_REFRESH_TOKEN }}
+          GOOGLE_ADS_LOGIN_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_LOGIN_CUSTOMER_ID }}
+          SKLIK_API_TOKEN: ${{ secrets.SKLIK_API_TOKEN }}
+          META_API_TOKEN: ${{ secrets.META_API_TOKEN }}
+        run: |
+          umask 077
+          python3 - <<'PY'
+          import os
+          nazvy = ["GOOGLE_ADS_DEVELOPER_TOKEN", "GOOGLE_ADS_CLIENT_ID", "GOOGLE_ADS_CLIENT_SECRET",
+                   "GOOGLE_ADS_REFRESH_TOKEN", "GOOGLE_ADS_LOGIN_CUSTOMER_ID",
+                   "SKLIK_API_TOKEN", "META_API_TOKEN"]
+          radky = [f"{n}={os.environ[n]}" for n in nazvy if os.environ.get(n)]
+          with open(".env", "w", encoding="utf-8") as f:
+              f.write("\n".join(radky) + "\n")
+          print(f"Zapsáno {len(radky)} přístupů (jen názvy jsou v kódu, hodnoty ne).")
+          PY
+
+      # Konfigurace hlídače obsahuje ID účtů → do repa nepatří, drží se v secretu HLIDAC_UCTY_JSON.
+      - name: Konfigurace účtů ze secretu
+        env:
+          HLIDAC_UCTY_JSON: ${{ secrets.HLIDAC_UCTY_JSON }}
+        run: |
+          umask 077
+          mkdir -p clients
+          if [ -z "$HLIDAC_UCTY_JSON" ]; then
+            echo "::error::Chybí secret HLIDAC_UCTY_JSON (obsah clients/hlidac-ucty.json)."
+            exit 2
+          fi
+          printf '%s' "$HLIDAC_UCTY_JSON" > clients/hlidac-ucty.json
+          python3 -c "import json; json.load(open('clients/hlidac-ucty.json', encoding='utf-8')); print('Konfigurace je platný JSON.')"
+
+      # Krycí plány (volitelné). plans/ je v .gitignore a do repa nepatří — drží se jako
+      # secret HLIDAC_PLANY_B64 (base64 archivu složky plans/, návod v README.md).
+      # Bez secretu se kontrola plnění krycího plánu přeskočí.
+      - name: Krycí plány ze secretu (volitelné)
+        env:
+          HLIDAC_PLANY_B64: ${{ secrets.HLIDAC_PLANY_B64 }}
+        run: |
+          umask 077
+          if [ -z "$HLIDAC_PLANY_B64" ]; then
+            echo "Secret HLIDAC_PLANY_B64 není nastavený — plnění krycího plánu se přeskočí."
+            exit 0
+          fi
+          printf '%s' "$HLIDAC_PLANY_B64" | base64 -d | tar xzf - plans
+          echo "Krycí plány rozbaleny (počet souborů: $(find plans -type f | wc -l | tr -d ' '))."
+
+      - name: Spuštění hlídačů
+        id: beh
+        run: |
+          set +e
+          # Plný výstup (názvy účtů, čísla) jde JEN do souboru → artefakt. Log běhu vidí
+          # každý s přístupem k repu, proto do něj i do souhrnu jdou jen počty.
+          python3 deploy/spust.py --rezim "${{ steps.rezim.outputs.rezim }}" > hlidac-vystup.txt 2>&1
+          KOD=$?
+          echo "exit=$KOD" >> "$GITHUB_OUTPUT"
+          SOUHRN=$(grep -oE 'Svítí [0-9]+ z [0-9]+ účtů|Všech [0-9]+ účtů v pořádku|[Nn]enačteno:? [0-9]+' hlidac-vystup.txt || true)
+          echo "Hlídač ${{ steps.rezim.outputs.rezim }}: exit $KOD"
+          [ -n "$SOUHRN" ] && echo "$SOUHRN"
+          echo "Plný report je v artefaktu tohoto běhu."
+          {
+            echo "## Hlídač: ${{ steps.rezim.outputs.rezim }} (exit $KOD)"
+            [ -n "$SOUHRN" ] && echo "$SOUHRN" | sed 's/^/- /'
+            echo ""
+            echo "Plný report: artefakt tohoto běhu."
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit 0
+
+      - name: Report jako artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hlidac-${{ steps.rezim.outputs.rezim }}-${{ github.run_id }}
+          path: |
+            reports/
+            hlidac-vystup.txt
+          retention-days: 14
+          if-no-files-found: warn
+
+      # ---- Notifikace (volitelné) ----
+      # Kam posílat, si vybíráš sám: e-mail, Slack, Telegram, Teams, Discord, ntfy…
+      # Přehled a co je potřeba: docs/notifikace.md. Svému Claude Code řekni:
+      #   „napoj notifikace hlídače v GitHub Actions na Slack podle docs/notifikace.md"
+      # Ukázka (Slack Incoming Webhook, posílá jen když něco svítí):
+      # - name: Notifikace
+      #   if: steps.beh.outputs.exit != '0'
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      #   run: |
+      #     python3 - <<'PY'
+      #     import json, os, urllib.request
+      #     text = open("hlidac-vystup.txt", encoding="utf-8").read()[:3000]
+      #     req = urllib.request.Request(os.environ["SLACK_WEBHOOK_URL"],
+      #         data=json.dumps({"text": text}).encode(), headers={"Content-Type": "application/json"})
+      #     urllib.request.urlopen(req, timeout=20)
+      #     PY
+
+      # ---- Analýza Claudem (volitelné, platí se tokeny nebo předplatným) ----
+      # Hlídač výše je jen pravidlový report. Když chceš, aby nálezy prošel Claude
+      # skillem anomalie, odkomentuj krok níž a přidej secret CLAUDE_CODE_OAUTH_TOKEN
+      # (vygeneruje `claude setup-token`) nebo ANTHROPIC_API_KEY. Krok přesuň PŘED „Report
+      # jako artifact", ať se reports/analyza.md nahraje taky. Návod: README.md vedle.
+      # - name: Analýza nálezů Claudem
+      #   if: steps.beh.outputs.exit != '0'
+      #   uses: anthropics/claude-code-action@v1
+      #   with:
+      #     claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      #     prompt: |
+      #       Přečti hlidac-vystup.txt a reporty v reports/. Každý 🔴 nález projdi postupem
+      #       skillu anomalie jen čtecími skripty. V účtech NIC neměň, nic nespouštěj s --apply
+      #       ani --confirm. Výsledek napiš do reports/analyza.md: nahoře kolik účtů svítí,
+      #       pod tím ke každému 1–2 věty (co, ověřená příčina, návrh). Domněnky označ.
+      #     claude_args: |
+      #       --max-turns 30
+      #       --allowedTools "Read,Grep,Glob,Write(reports/**),Bash(python3 scripts/hlidac/*),Bash(python3 deploy/spust.py*)"

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/hlidac.py": {
+      "maxDuration": 300,
+      "excludeFiles": "{tests/**,**/test_*.py,**/__pycache__/**}"
+    }
+  },
+  "crons": [
+    { "path": "/api/hlidac", "schedule": "30 5 * * *" },
+    { "path": "/api/hlidac", "schedule": "0 17 * * *" },
+    { "path": "/api/hlidac", "schedule": "0 16 * * 5" },
+    { "path": "/api/hlidac", "schedule": "0 8 * * 0,6" }
+  ]
+}

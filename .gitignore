@@ -1,0 +1,61 @@
+# ====== PPC asistent ======
+# Tajné přístupy — NIKDY necommitovat
+.env
+.env.*
+*.env
+!.env.example
+!**/.env.example
+google-ads.yaml
+chatgpt-ads/.env
+banner-generator/.env.local
+
+# Klienti: profily, plány a data jsou citlivé. V repu jen šablony.
+clients/*
+!clients/_TEMPLATE.md
+!clients/README.md
+# vzor konfigurace hlídačů (skutečná je v clients/hlidac-ucty.json)
+!scripts/hlidac/ucty.example.json
+
+# Výstupy (reporty hlídačů, forecast a krycí plány)
+reports/
+plans/
+data/
+exports/
+*-raw-*.json
+*.state.json
+plan.json
+*.preview.html
+preview.html
+deploy/vercel/balik/
+
+# Bannery: vygenerované složky klientů (případná ukázka se odblokuje níž)
+banner-generator/banners-*/
+!banner-generator/banners-ukazka/
+banner-generator/node_modules/
+
+# ChatGPT Ads: lokální stav rozpočtu dotazů
+chatgpt-ads/.usage/
+chatgpt-ads/.venv/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.mypy_cache/
+.pytest_cache/
+
+# Node
+node_modules/
+
+# Claude Code: osobní nastavení
+.claude/settings.local.json
+# Soukromé doplňky skillů (mapování účtů, firemní strategie) — nikdy do veřejného repa
+.claude/skills/**/my-accounts.md
+.claude/skills/**/my-strategy.md
+
+# Vercel: propojení projektu a lokální build
+.vercel/
+
+# OS
+.DS_Store

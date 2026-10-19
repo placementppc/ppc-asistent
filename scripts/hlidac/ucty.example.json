@@ -1,0 +1,72 @@
+{
+  "_navod": {
+    "jak_zacit": "Zkopíruj do clients/hlidac-ucty.json a doplň svoje účty. Pole začínající podtržítkem hlídače ignorují. Starý formát {\"ucty\": [...]} bez ostatních polí dál funguje.",
+    "planovani": {
+      "frekvence": "Jak často hlídače běží: denne | pracovni-dny (po–pá) | tydne (v pondělí, jiný den přes \"den\": \"fri\") | vlastni (rozhoduje plánovač). Skripty s --podle-planu v ostatní dny jen skončí.",
+      "casy": "Časy běhu hlídače výkyvů a cílů, HH:MM. První ráno (včerejšek), druhý večer (--dnes).",
+      "akce_casy": "Kdy běží hlídač akcí: den (mon tue wed thu fri sat sun) a čas. Pátek večer s --vikend.",
+      "timezone": "Časové pásmo pro plánovač. Nasazení: docs/nasazeni.md a skill nasazeni."
+    },
+    "notifikace": {
+      "kanal": "Kam posílat reporty: zadny | email | slack | telegram | jiny. Napojení si řešíš sám podle docs/notifikace.md. Hlídače reporty jen ukládají do reports/."
+    },
+    "ucty": {
+      "nazev": "Tvůj název účtu, objeví se v reportu.",
+      "klient": "Zkratka klienta = název souboru clients/<klient>.md. Z jeho changelogu (řádky ### RRRR-MM-DD) hlídač cílů pozná poslední změnu.",
+      "system": "sklik | meta | google",
+      "id": "Sklik userId (číslo), Meta act_…, Google customer ID 123-456-7890.",
+      "min_utrata": "Hlídač výkyvů: pod touhle běžnou denní útratou účet nehlídat.",
+      "hlidat": "Které hlídače účet projdou: vykyvy (hlidac.py), cile (cile.py), akce (akce.py), kryci-plan (scripts/plan/plneni.py). Když pole chybí, hlídají všechny, které mají data (cíle a akce jen s blokem cile).",
+      "cile.typ": "pno (náklady/obrat v %) | roas (obrat/náklady jako násobek, 6 = 600 %) | cpa (Kč za konverzi) | konverze (počet za měsíc).",
+      "cile.hodnota": "Cílová hodnota: PNO 15 = 15 %, ROAS 6 = 600 %, CPA 250 = 250 Kč, konverze 120 = 120 za měsíc.",
+      "cile.mesicni_rozpocet": "Volitelné. Měsíční rozpočet účtu v Kč: hlídač cílů hlídá tempo čerpání, hlídač akcí nenavrhne navýšení nad zbytek měsíce.",
+      "cile.mesicni_obrat": "Volitelné. Plán obratu z reklam za měsíc v Kč (tempo obratu).",
+      "limity.max_denni_rozpocet": "Strop součtu denních rozpočtů všech aktivních kampaní účtu v Kč. Hlídač akcí nad něj nikdy nenavrhne.",
+      "limity.max_navyseni_pct": "Největší jednorázové navýšení rozpočtu kampaně v % (o víkendu max 10 %).",
+      "limity.max_navyseni_tyden_pct": "Největší navýšení za 7 dní v % proti nejnižšímu rozpočtu za týden (hlídač si rozpočty pamatuje v reports/hlidac-akci/rozpocty.json).",
+      "posledni_zmena": "Volitelné RRRR-MM-DD. Od kdy hodnotit plnění cílů. Když chybí: changelog klienta, jinak 28 dní.",
+      "token_var": "Jen Sklik, když se účet čte jiným (agenturním) tokenem — NÁZEV proměnné prostředí, nikdy hodnota.",
+      "profil": "Jen Google, když účet visí pod jiným MCC (stejně jako GOOGLE_ADS_PROFILE u ostatních skriptů).",
+      "vypnuto": "true = účet dočasně přeskočit všemi hlídači."
+    }
+  },
+  "planovani": {
+    "frekvence": "denne",
+    "casy": ["07:30", "19:00"],
+    "akce_casy": ["fri 18:00", "sat 10:00", "sun 10:00"],
+    "timezone": "Europe/Prague"
+  },
+  "notifikace": {
+    "kanal": "zadny",
+    "poznamka": "email | slack | telegram | jiny — napojení si řešíš sám, viz docs/notifikace.md"
+  },
+  "ucty": [
+    {
+      "nazev": "Můj e-shop", "klient": "muj-eshop", "system": "google", "id": "123-456-7890",
+      "min_utrata": 100,
+      "hlidat": ["vykyvy", "cile", "akce", "kryci-plan"],
+      "cile": {"typ": "pno", "hodnota": 15, "mesicni_rozpocet": 30000, "mesicni_obrat": 200000},
+      "limity": {"max_denni_rozpocet": 1500, "max_navyseni_pct": 20, "max_navyseni_tyden_pct": 30},
+      "posledni_zmena": "2026-10-01"
+    },
+    {
+      "nazev": "Můj e-shop", "klient": "muj-eshop", "system": "sklik", "id": 123456,
+      "min_utrata": 100,
+      "hlidat": ["vykyvy", "cile", "akce"],
+      "cile": {"typ": "roas", "hodnota": 6, "mesicni_rozpocet": 15000},
+      "limity": {"max_denni_rozpocet": 700, "max_navyseni_pct": 20, "max_navyseni_tyden_pct": 30}
+    },
+    {
+      "nazev": "Můj e-shop", "klient": "muj-eshop", "system": "meta", "id": "act_1234567890",
+      "min_utrata": 100,
+      "hlidat": ["vykyvy", "cile", "akce"],
+      "cile": {"typ": "roas", "hodnota": 5, "mesicni_rozpocet": 20000},
+      "limity": {"max_denni_rozpocet": 1000, "max_navyseni_pct": 15, "max_navyseni_tyden_pct": 25}
+    },
+    {
+      "nazev": "Moje služby (leady)", "klient": "moje-sluzby", "system": "google", "id": "123-456-7891",
+      "hlidat": ["vykyvy", "cile"],
+      "cile": {"typ": "cpa", "hodnota": 250, "mesicni_rozpocet": 12000}
+    }
+  ]
+}

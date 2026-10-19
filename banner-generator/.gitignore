@@ -1,0 +1,31 @@
+node_modules/
+.DS_Store
+
+# Tajné přístupy (Gemini, OpenAI) — nikdy necommitovat; v repu jen vzor .env.example
+.env
+.env.*
+!.env.example
+
+# Klienti, jejich podklady a hotové bannery zůstávají jen lokálně.
+# Ve veřejném repozitáři je jen ukázka (texty), ne její výstupy.
+banners-*/
+!banners-ukazka/
+banners-ukazka/**/*.png
+banners-ukazka/**/*.jpg
+banners-ukazka/**/*.jpeg
+banners-ukazka/**/*.webp
+banners-ukazka/**/*.mp4
+banners-ukazka/_assets/
+banners-ukazka/_html/
+banners-ukazka/_probe/
+banners-ukazka/brand/
+banners-ukazka/sklik/
+configs/*
+!configs/ukazka.ts
+
+# Mezivýstupy
+**/_raw/
+**/*_anim-plate.png
+**/*_anim-text.png
+**/*_anim-bg.png
+**/koncept_*_animated_*.html

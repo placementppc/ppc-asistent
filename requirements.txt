@@ -1,0 +1,6 @@
+# Google Ads API (oficiální klient). Sklik používá jen stdlib (urllib).
+google-ads>=25.0.0
+# Pro jednorázové vygenerování refresh tokenu (scripts/google_ads/generate_refresh_token.py)
+google-auth-oauthlib>=1.2.0
+# Meta Ads konektor (scripts/meta/fetch.py) — Graph API přes HTTP
+requests>=2.31.0

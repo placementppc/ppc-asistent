@@ -1,0 +1,5 @@
+# Stejné knihovny jako appka (requirements.txt v kořeni), bez nástroje na refresh token.
+# Nainstalované google-ads + requests mají cca 145 MB (měřeno pip install, říjen 2026);
+# limit Python funkce na Vercelu je 500 MB.
+google-ads>=25.0.0
+requests>=2.31.0

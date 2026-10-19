@@ -1,0 +1,21 @@
+{
+  "name": "banner-generator",
+  "version": "1.0.0",
+  "description": "AI banner generátor (Meta, Google Ads, Sklik) — Gemini (výchozí) + volitelně OpenAI gpt-image-2 + puppeteer",
+  "private": true,
+  "scripts": {
+    "mp4": "npx tsx banner-to-mp4.ts",
+    "animate": "npx tsx animate-banner.ts",
+    "generate:gemini": "npx tsx generate-banners.ts",
+    "generate:openai": "npx tsx generate-banners-openai.ts",
+    "cards": "npx tsx compose-cards.ts",
+    "reel": "npx tsx reel-generator.ts",
+    "sklik": "node resize-sklik.mjs"
+  },
+  "dependencies": {
+    "ffmpeg-static": "^5.3.0",
+    "puppeteer": "^24.0.0",
+    "sharp": "^0.34.5",
+    "tsx": "^4.19.0"
+  }
+}

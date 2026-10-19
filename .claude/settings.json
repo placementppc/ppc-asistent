@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(*.env)",
+      "Read(google-ads.yaml)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Edit|Write|Grep|Glob|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/nda_guard.py\"",
+            "timeout": 10,
+            "statusMessage": "Kontrola NDA a klíčů"
+          }
+        ]
+      }
+    ]
+  }
+}
