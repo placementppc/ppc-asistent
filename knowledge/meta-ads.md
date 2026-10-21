@@ -408,8 +408,8 @@ v reportu vady kreativy nezachytí.
   Kreslí se před textem, písmo zůstává ostré.
 - `band.toEdge: 'top' | 'bottom'` — dotáhne pruh na hranu plátna (jinak pod ním zůstane proužek fotky).
 
-⚠️ **Fonty:** `DIN Condensed Bold` ani `Impact` se přes libvips nenačtou (Pango vrátí fallback).
-Použitelné jsou `Arial Black` a `Arial Narrow Bold`; jiný řez je potřeba doinstalovat.
+⚠️ **Fonty:** písmo podle jména (`fontFamily` bez `fontFile`) se často nenačte, třeba `DIN Condensed Bold`
+nebo `Impact` (Pango vrátí náhradní). Spolehlivě funguje jen `fontFile` s .ttf/.otf: vykreslí se přímo ze souboru.
 
 ✅ **`--relayout`** přesází text nad surovým podkladem z `_raw/` bez nového volání modelu.
 Před laděním zkontroluj, že `_raw/` existuje.

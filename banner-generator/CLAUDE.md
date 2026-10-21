@@ -114,8 +114,10 @@ Engine proto generuje **jen obraz**; nadpis, cenu, CTA a logo skládá **kódem*
 
 - Rozměry: resize `fit: 'cover'` (bez deformace), nikdy `fill`.
 - Text: pole `overlays?: TextOverlay[]` na konceptu → SVG přes `sharp` (přesná diakritika a pixely).
-  Brandový font: `fontFile` (cesta k .ttf/.otf z `banners-<klient>/brand/fonts/`) — vykreslí se přes libvips
-  bez instalace do systému. `@font-face` + base64 v SVG přes librsvg nefunguje.
+  Brandový font: `fontFile` (cesta k .ttf/.otf z `banners-<klient>/brand/fonts/`) — obrysy písmen se čtou
+  přímo ze souboru (fontkit, `lib/brand-font.ts`) a skládají jako vektor, bez instalace do systému.
+  Variabilní font (jeden soubor na všechny váhy) dostane řez podle `weight`; statický se použije, jak je.
+  libvips `fontfile` ani `@font-face` v SVG nefungují (tiše vysází náhradní písmo). Test: `npm test`.
 - Pod text: `band` (plný barevný pruh v barvě z manuálu) nebo `scrim` (tmavý přechod nad fotkou).
   `band` se vykreslí jen u overlaye s `fontFile` (bez souboru fontu se tiše vynechá). Vzor obou variant: `configs/ukazka.ts`.
 - Logo: pole `logo?: LogoSpec` → composite přes `sharp`. **Logo NIKDY do AI promptu.**

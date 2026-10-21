@@ -8,6 +8,7 @@
 
 import sharp from 'sharp';
 import type { LogoSpec, TextOverlay } from '../banner-formats';
+import { layoutTextBlock } from './brand-font';
 
 function escapeXml(s: string): string {
   return s
@@ -18,7 +19,7 @@ function escapeXml(s: string): string {
 }
 
 /** Vyrenderuje jeden textový overlay a složí ho na banner.
- *  - S `fontFile`: nativní libvips text s přesným brandovým fontem (poloha = TOP textu).
+ *  - S `fontFile`: obrysy písmen přímo ze souboru fontu jako vektor (poloha = TOP textu).
  *  - Bez `fontFile`: SVG se systémovým fontem (poloha = ÚČARÍ / baseline prvního řádku).
  */
 export async function compositeText(
@@ -28,39 +29,17 @@ export async function compositeText(
   const banner = sharp(bannerBuf);
   const { width: W = 0, height: H = 0 } = await banner.metadata();
 
-  // --- Větev A: přesný brandový font ze souboru (libvips native text) ---
+  // --- Větev A: přesný brandový font ze souboru (vektorové cesty, lib/brand-font.ts) ---
   if (ov.fontFile) {
     const anchor = ov.anchor ?? 'start';
     const color = ov.color ?? '#ffffff';
-    const weight = ov.weight ?? 800;
-    const family = ov.fontFamily ?? 'sans-serif';
 
-    // Zarovnání víceřádkového bloku vůči sobě (libvips ořízne obraz na šířku obsahu).
-    const align: 'low' | 'centre' | 'high' =
-      anchor === 'middle' ? 'centre' : anchor === 'end' ? 'high' : 'low';
-
-    const markup =
-      `<span foreground="${color}" weight="${weight}">` +
-      `${ov.lines.map(escapeXml).join('\n')}</span>`;
-
-    const textBuf = await sharp({
-      text: {
-        text: markup,
-        // dpi 72 → velikost v "bodech" ≈ pixely (parita s px hodnotou fontSize v SVG větvi)
-        font: `${family} ${ov.fontSize}`,
-        fontfile: ov.fontFile,
-        rgba: true,
-        align,
-        width: W, // wrap až na šířce banneru; obraz se stejně ořízne na obsah
-        dpi: 72,
-        spacing: Math.round(ov.fontSize * ((ov.lineHeight ?? 1.15) - 1)),
-      },
-    })
-      .png()
-      .toBuffer();
+    const block = layoutTextBlock({ ...ov, fontFile: ov.fontFile });
+    if (!block) return bannerBuf;
 
     // Vodorovná poloha bloku podle SKUTEČNÉ šířky textu a kotvy (xPct = poloha kotvy).
-    const { width: tw = 0 } = await sharp(textBuf).metadata();
+    const tw = Math.round(block.width);
+    const th = Math.round(block.height);
     const anchorX = Math.round(W * ov.xPct);
     let left = anchorX; // 'start' → levá hrana na xPct
     if (anchor === 'middle') left = anchorX - Math.round(tw / 2);
@@ -68,9 +47,16 @@ export async function compositeText(
 
     const top = Math.round(H * ov.yPct);
 
+    // Text přes celé plátno: co přeteče přes okraj, se ořízne (sharp nesloží vrstvu větší než banner).
+    const textBuf = Buffer.from(
+      `<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">` +
+        `<g transform="translate(${left} ${top})" fill="${escapeXml(color)}">` +
+        block.paths.map(d => `<path d="${d}"/>`).join('') +
+        `</g></svg>`,
+    );
+
     // Plný pruh pod textem — kreslí se PŘED textem, aby písmo zůstalo ostré.
     if (ov.band) {
-      const { height: th = 0 } = await sharp(textBuf).metadata();
       const padX = Math.round(W * (ov.band.padXPct ?? 0.045));
       const padY = Math.round(H * (ov.band.padYPct ?? 0.028));
       const bandLeft = ov.band.fullWidth ? 0 : Math.max(0, left - padX);
@@ -84,14 +70,16 @@ export async function compositeText(
           `<rect width="${bandW}" height="${bandH}" fill="${ov.band.color}" ` +
           `fill-opacity="${ov.band.opacity ?? 1}"/></svg>`,
       );
-      const withBand = await banner
-        .composite([{ input: rect, left: bandLeft, top: bandTop }])
+      return banner
+        .composite([
+          { input: rect, left: bandLeft, top: bandTop },
+          { input: textBuf, left: 0, top: 0 },
+        ])
         .png()
         .toBuffer();
-      return sharp(withBand).composite([{ input: textBuf, left, top }]).png().toBuffer();
     }
 
-    return banner.composite([{ input: textBuf, left, top }]).png().toBuffer();
+    return banner.composite([{ input: textBuf, left: 0, top: 0 }]).png().toBuffer();
   }
 
   // --- Větev B: systémový font přes SVG ---

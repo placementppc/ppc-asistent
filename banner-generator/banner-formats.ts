@@ -39,11 +39,12 @@ export type TextOverlay = {
   fontSize: number; // v px vůči cílovému rozměru banneru
   lineHeight?: number; // násobek fontSize, default 1.15
   color?: string; // default '#ffffff'
-  weight?: number | string; // default 800
-  fontFamily?: string; // default systémový sans-serif
-  // Přesný brandový font ze souboru (.ttf/.otf). Když je uveden, text se vykreslí
-  // nativně přes libvips (fontfile) — přesný řez bez instalace do systému.
-  // fontFamily pak musí odpovídat názvu rodiny uvnitř toho fontu.
+  weight?: number | string; // default 800; u variabilního fontFile nastaví osu wght
+  fontFamily?: string; // default systémový sans-serif; s fontFile jen výběr řezu z .ttc
+  // Přesný brandový font ze souboru (.ttf/.otf). Když je uveden, obrysy písmen se čtou
+  // přímo ze souboru a skládají jako vektor (lib/brand-font.ts) — Mac i Windows, bez
+  // instalace do systému. Variabilní font dostane váhu z `weight`, statický řez se použije,
+  // jak je. yPct je pak HORNÍ hrana textu (ne účaří).
   fontFile?: string;
   // Tmavý přechod pod textem, aby zůstal čitelný i nad fotkou. Bez něj text padne
   // na cokoli, co model do té části obrazu nakreslí (u fotoscén typicky produkt).
