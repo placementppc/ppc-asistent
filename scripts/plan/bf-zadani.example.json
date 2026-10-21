@@ -1,0 +1,13 @@
+{
+  "klient_nazev": "Můj e-shop",
+  "cil": { "pno": 25, "obrat": null },
+  "marze_pct": 40,
+  "rozpocet": { "2026-11": null, "2026-12": null },
+  "akce": { "popis": "−20 % na vše, doprava zdarma", "od": "2026-11-20", "do": "2026-11-30" },
+  "black_friday": null,
+  "posledni_doruceni": "2026-12-18",
+  "top_produkty": ["Produkt A", "Produkt B"],
+  "grafika": "Bannery z AI podle brand manuálu, 3 varianty hooku na Black Week, dárkové kreativy od 1. 12.",
+  "loni": "Co loni fungovalo a co ne (jedna dvě věty).",
+  "poznamky": ""
+}

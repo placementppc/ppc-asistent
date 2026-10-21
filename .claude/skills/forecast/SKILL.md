@@ -74,6 +74,9 @@ Návratový kód: 0 OK, 1 forecast je, ale se slabší oporou (bez loňska), 2 c
 
 ## 5. Navazuje
 
+- **Black Friday a Vánoce**: plán po týdnech s fázemi, kreativami a PDF dělá skill `black-friday`
+  (stejný výpočet měsíců + rozpad podle loňské sezóny, umí i ruční exporty z Ads, Mety a GA4).
+
 - **Krycí plán**: forecast → měsíční čísla → `scripts/plan/kryci_plan.py` je rozpadne na dny
   (skill `kryci-plan`). Bez zadaného rozpočtu si krycí plán vezme realistický forecast sám.
 - Rozpočty v účtech se podle forecastu **nemění automaticky**. Změna jen po schválení člověkem,

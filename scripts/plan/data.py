@@ -13,6 +13,7 @@ import io
 import json
 import re
 import sys
+import time
 import unicodedata
 from datetime import date, timedelta
 from pathlib import Path
@@ -186,18 +187,34 @@ def stahni(ucty: list[dict], od: date, do: date, okno_dni: int = 92) -> tuple[li
         s = normalizuj_system(u.get("system", ""))
         print(f"  · stahuju {u.get('nazev')} ({s}) {od} → {do}", file=sys.stderr)
         start = od
+        okno = okno_dni
+        opakovani = 1
+        ucet: list[Radek] = []
         try:
             while start <= do:
-                konec = min(do, start + timedelta(days=okno_dni - 1))
-                dny, _ = _stahni_ucet(z, u, start.isoformat(), konec.isoformat())
+                konec = min(do, start + timedelta(days=okno - 1))
+                try:
+                    dny, _ = _stahni_ucet(z, u, start.isoformat(), konec.isoformat())
+                except Exception as e:
+                    # Sklik vrací max. 5 000 řádků (kampaně × dny) na dotaz → u velkého účtu zmenši okno
+                    if "too much data" in str(e).lower() and okno > 7:
+                        okno = max(7, okno // 3)
+                        continue
+                    if opakovani and "temporarily" in str(e).lower():   # Meta občas jen dočasně nedostupná
+                        opakovani -= 1
+                        time.sleep(5)
+                        continue
+                    raise
                 for d in dny:
-                    radky.append(Radek(date.fromisoformat(str(d.datum)[:10]), s, float(d.utrata),
+                    ucet.append(Radek(date.fromisoformat(str(d.datum)[:10]), s, float(d.utrata),
                                        float(d.hodnota or 0), float(d.konverze or 0), float(d.prokliky or 0)))
                 start = konec + timedelta(days=1)
+            radky.extend(ucet)
+        # Useknutý účet se do výpočtu nedává vůbec: chybějící týdny by vypadaly jako propad.
         except SystemExit as e:
-            varovani.append(f"Účet {u.get('nazev')} ({s}) nešel načíst: {_redact(e)}")
+            varovani.append(f"Účet {u.get('nazev')} ({s}) nešel načíst, ve výpočtu chybí: {_redact(e)}")
         except Exception as e:  # jeden účet nesmí shodit celý plán
-            varovani.append(f"Účet {u.get('nazev')} ({s}) nešel načíst: {_redact_exc(e)}")
+            varovani.append(f"Účet {u.get('nazev')} ({s}) nešel načíst, ve výpočtu chybí: {_redact_exc(e)}")
     return radky, varovani
 
 
