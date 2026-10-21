@@ -17,6 +17,7 @@ napište `/start` a průvodce vás provede vším ostatním.
 | 🎨 **Bannery AI** | Nejdřív brand manuál: buď ho dodáte, nebo si ho asistent vytvoří z webu klienta. Teprve podle něj koncepty, schválení a výroba (Gemini, volitelně OpenAI) | „udělej bannery na Black Friday" |
 | 🔌 **Napojení** | Návody na přístupy do Google Ads, Skliku, Mety, ChatGPT Ads a GA4, včetně ověření, že to funguje | „napoj Sklik" |
 | 📈 **Forecast** | Odhad na měsíc ze skutečné historie účtu: sezónnost, scénáře, co udělá vyšší rozpočet | „forecast na listopad" |
+| 💬 **Hooky** | Zeptá se na zákazníka a chvíli, kdy problém nastává, a navrhne hooky po typech. Tři nejlepší jdou do testu claimů | „najdi hooky na banner" |
 | 🛍 **Black Friday a Vánoce** | Průvodce: zeptá se na cíle, akci a grafiku, vezme data z API nebo exportů (Ads, Meta, Sklik, GA4) a vyrobí plán po týdnech v PDF | „plán na Black Friday" |
 | 📅 **Denní krycí plán** | Měsíční rozpočet a obrat rozpadne na dny a systémy. Každý den porovná skutečnost s plánem a spočítá, kolik dohnat | „krycí plán na prosinec", „jsme v plánu?" |
 | 🛠 **Optimalizace** | Přes 25 skillů: vyhledávací dotazy, PMax, Seznam Nákupy, Meta strop a katalog, měření, aukce, tempo rozpočtu, tvorba kampaní a textů | „projdi účet", „co vyloučit" |

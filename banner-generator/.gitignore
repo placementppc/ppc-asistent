@@ -22,6 +22,7 @@ banners-ukazka/brand/
 banners-ukazka/sklik/
 configs/*
 !configs/ukazka.ts
+!configs/ukazka-black-friday.ts
 
 # Mezivýstupy
 **/_raw/

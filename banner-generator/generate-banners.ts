@@ -77,9 +77,13 @@ function mimeFor(file: string): string {
 /** Znovu složí text nad uloženým surovým podkladem. Nevolá žádné API. */
 async function relayoutOne(concept: Concept, format: Format, outDir: string): Promise<boolean> {
   const fileName = `gemini_${concept.slug}_banner_${format.fileSuffix}.png`;
-  const rawPath = path.join(outDir, '_raw', fileName);
+  // `podklad` = obrázek jiného konceptu (test claimů, Black Friday verze vítěze)
+  const rawName = `gemini_${concept.podklad ?? concept.slug}_banner_${format.fileSuffix}.png`;
+  const rawPath = path.join(outDir, '_raw', rawName);
   if (!fs.existsSync(rawPath)) {
-    console.warn(`   ⚠️  ${concept.id} ${format.fileSuffix}: chybí podklad v _raw/ — nejdřív vygeneruj bez --relayout`);
+    console.warn(concept.podklad
+      ? `   ⚠️  ${concept.id} ${format.fileSuffix}: chybí obrázek konceptu „${concept.podklad}“ — nejdřív vygeneruj ten koncept (stejný formát)`
+      : `   ⚠️  ${concept.id} ${format.fileSuffix}: chybí podklad v _raw/ — nejdřív vygeneruj bez --relayout`);
     return false;
   }
   const isStories = format.width === 1080 && format.height === 1920;
@@ -90,7 +94,7 @@ async function relayoutOne(concept: Concept, format: Format, outDir: string): Pr
   });
   const outPath = path.join(outDir, fileName);
   fs.writeFileSync(outPath, out);
-  console.log(`   ✅ ${fileName} (přesazeno, bez generování)`);
+  console.log(`   ✅ ${fileName} (${concept.podklad ? `obrázek z ${concept.podklad}` : 'přesazeno'}, bez generování)`);
   return true;
 }
 
@@ -204,7 +208,7 @@ async function main() {
   for (const concept of concepts) {
     console.log(`\n▶  ${concept.id} — ${concept.slug}`);
     for (const format of formats) {
-      const success = relayout
+      const success = relayout || concept.podklad
         ? await relayoutOne(concept, format, outDir)
         : await generateOne(concept, format, outDir);
       if (success) ok++; else failed++;

@@ -1,6 +1,6 @@
 ---
 name: bannery
-description: Výroba bannerů (PNG, MP4, reels) pro Metu, Google Ads a Sklik přes banner-generátor v podsložce banner-generator/. Před prvním konceptem vyžaduje schválený brand manuál klienta (když chybí, spustí skill brand-manual). Použij VŽDY, když uživatel chce bannery, kreativy, vizuály, „udělej bannery na Black Friday / Vánoce", „rozhýbej banner", „reel", „nové kreativy pro klienta X", „co vyrobit podle coverage", nebo chce hotové bannery nahrát do kampaní. Bez tohoto skillu se pravidla banner-generátoru nenačtou celá a výstupy jsou špatné.
+description: Výroba bannerů (PNG, MP4, reels) pro Metu, Google Ads a Sklik přes banner-generátor v podsložce banner-generator/. Před prvním konceptem vyžaduje schválený brand manuál klienta (když chybí, spustí skill brand-manual). Použij VŽDY, když uživatel chce bannery, kreativy, vizuály, „udělej bannery na Black Friday / Vánoce", „rozhýbej banner", „reel", „nové kreativy pro klienta X", „co vyrobit podle coverage", nebo chce hotové bannery nahrát do kampaní, nebo „test claimů“, „Black Friday verze“, „udělej z vítěze BF banner“. Bez tohoto skillu se pravidla banner-generátoru nenačtou celá a výstupy jsou špatné.
 ---
 
 # Bannery
@@ -87,6 +87,28 @@ Další nástroje (stejně přes `npm --prefix banner-generator run …`, ne př
 npm --prefix banner-generator run cards -- <config> --format=1080x1080   # bez obrazové AI: výřezy produktu + sazba
 npm --prefix banner-generator run reel -- <config> --probe              # reely 9:16, pozadí přes OpenAI
 npm --prefix banner-generator run sklik -- banners-<klient>             # zmenšení na rozměry Skliku
+```
+
+## Black Friday: nejdřív test claimů, pak BF verze vítěze
+
+Když uživatel chce bannery na Black Friday nebo sezónní akci, navrhni tenhle postup (vzor
+`banner-generator/configs/ukazka-black-friday.ts`):
+
+1. **Test claimů (teď, 2–4 týdny před akcí).** Jeden obrázek z AI, 3 claimy, každý jiný úhel:
+   problém zákazníka / přínos / peníze nebo důkaz. První koncept obrázek generuje, ostatní mají
+   `podklad: '<slug prvního>'` a liší se jen nadpisem. Vyhraje claim, ne obrázek. Bez slevy a bez „Black Friday“.
+2. **Vyhodnocení po 5–7 dnech** v jedné sadě reklam (Meta) / jedné sestavě: rozhoduje cena za nákup,
+   ne CTR. Málo dat (pod ~20 nákupů na claim)? Řekni to a vyber podle ceny za proklik do košíku nebo CTR, s výhradou.
+3. **Black Friday verze vítěze.** Stejný obrázek (`podklad` = slug vítěze), nahoře skutečná nabídka,
+   dole termín. Další verze: Cyber Monday („poslední den“), Vánoce („doručíme do Vánoc“, bez slevy).
+   AI se nevolá, nic to nestojí. **Nabídku (sleva, termín) se vždy zeptej. Nikdy ji nevymýšlej.**
+4. Kontrola textu na každém PNG (fáze 3) a nahrání jen po schválení.
+
+`podklad` umí jen `generate:gemini` (ukládá surový obrázek do `_raw/`). Příkazy:
+
+```bash
+npm --prefix banner-generator run generate:gemini -- <config> --only=T1,T2,T3 --format=1080x1080
+npm --prefix banner-generator run generate:gemini -- <config> --only=BF1,BF2,V1 --format=1080x1080
 ```
 
 ## 5. Zpátky do kampaní (jen po schválení)

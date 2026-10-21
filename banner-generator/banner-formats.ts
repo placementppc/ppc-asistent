@@ -77,6 +77,12 @@ export type Concept = {
   getReferences?: (f: Format) => string[]; // víc reference fotek (např. ukázkové bannery)
   logo?: LogoSpec; // NOVÉ (opt-in) — logo se složí kódem po generaci
   overlays?: TextOverlay[]; // NOVÉ (opt-in) — texty skládané kódem po generaci
+  /**
+   * Slug jiného konceptu, jehož surový obrázek (bez textu, `_raw/`) se použije. AI se nevolá,
+   * jen se složí jiný text. Pro test claimů (stejný obrázek, liší se jen nadpis) a pro
+   * Black Friday verzi vítěze testu. Jen runner Gemini (ten ukládá `_raw/`).
+   */
+  podklad?: string;
 };
 
 export type Config = {

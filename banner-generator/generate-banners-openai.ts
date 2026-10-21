@@ -228,6 +228,11 @@ async function main() {
   let failed = 0;
   for (const concept of concepts) {
     console.log(`\n▶  ${concept.id} — ${concept.slug}`);
+    if (concept.podklad) {
+      // Sdílený obrázek (`podklad`) umí jen runner Gemini, který ukládá `_raw/`.
+      console.warn(`   ⚠️  ${concept.id}: má „podklad“, to umí jen generate:gemini — přeskočeno`);
+      continue;
+    }
     for (const format of formats) {
       const success = await generateOne(concept, format, outDir);
       if (success) ok++; else failed++;

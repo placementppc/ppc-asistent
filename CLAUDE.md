@@ -95,6 +95,7 @@ návrhy → (po schválení) zápis.
 | `meta-strop`, `meta-katalog`, `coverage-matrix` | Meta Ads |
 | `forecast` | odhad měsíce z historie účtu |
 | `black-friday` | průvodce plánem Black Friday a Vánoc po týdnech, PDF |
+| `hooky` | hooky na situaci zákazníka, 3 do testu claimů |
 | `kryci-plan` | denní krycí plán rozpočtu a obratu, plnění k dnešku |
 | `hlidac` | náhlé výkyvy ráno / večer (jen čte) |
 | `hlidac-cilu` | plnění cílů od poslední změny + návrhy |
