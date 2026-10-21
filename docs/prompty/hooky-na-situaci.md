@@ -17,6 +17,8 @@ Pak navrhni hooky po typech, ke každému 2–3, max. 6 slov, česky:
 - Sebe-selekce: oslovení jedné skupiny
 - Důkaz: jen skutečný, se zdrojem
 
-Pravidla: hook musí znít jako věta, kterou by řekl kamarád, ne jako slogan. Když jde vyměnit za jakýkoli jiný produkt v kategorii, je moc obecný. Situace před vlastností produktu. Žádná sleva v hooku. Čísla, recenze a ceny jen ze zdroje. U doplňků stravy jen schválená zdravotní tvrzení EU.
+Když jde o Black Friday nebo Vánoce, přidej i hooky na situaci, kterou zákazník v tu dobu má: zásoba (nakupuje do zásoby), dárek, odkládání (konečně to koupí, termín do neděle), vítěz testu + nabídka (pro nové zákazníky) a čistá sleva (pro ty, kdo produkt znají). Slevu použij jen skutečnou, kterou ti napíšu.
+
+Pravidla: hook musí znít jako věta, kterou by řekl kamarád, ne jako slogan. Když jde vyměnit za jakýkoli jiný produkt v kategorii, je moc obecný. Situace před vlastností produktu. V testu před akcí bez slevy, testujeme důvod koupit. Žádné superlativy, které nejde doložit („nejlepší na trhu“). Čísla, recenze a ceny jen ze zdroje. U doplňků stravy jen schválená zdravotní tvrzení EU.
 
 Nakonec doporuč 3 hooky různých typů na test (jeden obrázek, tři nadpisy, 5–7 dní, rozhoduje cena za nákup) a napiš proč.

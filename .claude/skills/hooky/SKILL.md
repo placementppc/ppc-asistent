@@ -35,20 +35,22 @@ Ke každému typu 2–3 návrhy, max. 6 slov, česky, oslovení podle brand manu
 | **Situace** | popíše chvíli, ve které se zákazník pozná | „Ve tři odpoledne vás vypne jako světlo?“ |
 | **Moment** | konkrétní čas nebo místo | „Půlnoc. Tělo spí, hlava jede dál.“ |
 | **Námitka** | řekne nahlas, co si zákazník myslí; odpověď je v podnadpisu | „Další doplněk, co nic nedělá?“ |
-| **Pro koho** | osloví jednu skupinu, ostatní přeskočí | „Běháte třikrát týdně? Svaly to poznají.“ |
+| **Pro koho** | osloví jednu skupinu, ostatní přeskočí | „Pro všechny, co jen přežívají pondělí.“ |
 | **Výsledek** | stav po použití, bez slibu, který nejde dokázat | „Konečně odpoledne bez druhého kafe.“ |
 | **Důkaz** | třetí strana, ne vy | „4,8 z 5. Hodnotí ti, co ho berou každý den.“ (jen skutečné) |
-| **Takhle ne** | vlastnost, superlativ, sleva | „Nejlepší hořčík na trhu! −50 %“ |
+| **Takhle ne** | superlativ, který nejde doložit | „Nejlepší hořčík na trhu!“ (klamavá reklama) |
 
 Dobrý hook zní jako věta, kterou by řekl kamarád, ne jako slogan. Kontrola: zastavil bych se u toho já?
 Když hook jde vyměnit za jakýkoli jiný produkt v kategorii, je moc obecný.
 
 Pravidla:
 - **Situace před vlastností.** Vlastnost patří do podnadpisu, ne do hooku.
-- **Žádná sleva v hooku.** Sleva přijde až v Black Friday verzi vítěze (skill `bannery`).
+- **V testu před akcí bez slevy.** Testujeme důvod koupit. Sleva přijde v Black Friday verzi (níž).
 - **Nic nevymýšlej:** čísla, recenze, ceny a garance jen ze zdroje (URL). Bez zdroje typ Důkaz vynech.
 - **Legislativa:** doplňky stravy jen schválená zdravotní tvrzení EU, kosmetika bez léčebných účinků.
   Hook o situaci („Večer padáte únavou?“) je v pořádku, slib léčby ne.
+- **Meta:** hook se nesmí ptát přímo na věk, diagnózu ani jiné osobní údaje („Je vám přes 50?“, „Trpíte nespavostí?“).
+  Situace a pocit ano („Večer padáte únavou?“).
 - 1,5sekundový test: rozumí člověk, který značku nezná, co se prodává a komu?
 
 ## 3. Výběr do testu
@@ -58,3 +60,19 @@ ve skillu `bannery`: jeden obrázek, tři nadpisy, vyhodnocení po 5–7 dnech p
 Vítěz pak dostane Black Friday verzi se skutečnou nabídkou.
 
 Výstup: tabulka typ / hook / pro koho / proč / zdroj (u důkazu). Nic negeneruj ani nenahrávej bez schválení.
+
+## 4. Black Friday a Vánoce: jiná situace zákazníka
+
+Na Black Friday zákazník nakupuje do zásoby, hledá dárky, konečně koupí, co odkládal, a hlídá termín.
+Navrhni k vítězi testu i tyhle typy (nabídku vždy jen skutečnou, se zeptáním):
+
+| Situace | Příklad | Pro koho |
+|---|---|---|
+| **Vítěz + nabídka** | „Ve tři odpoledne vás vypne jako světlo? Teď o [__ %] levněji.“ | studené publikum: důvod z testu, sleva navrch |
+| **Zásoba** | „Zásoba na zimu, dokud je Black Friday.“ | kdo produkt zná nebo používá |
+| **Odkládání** | „Chtěli jste ho zkusit „někdy“? Někdy je do neděle.“ | kdo váhal, dostane termín |
+| **Dárek** | „Dárek pro mámu, co jen přežívá pondělí.“ | od Black Friday do Vánoc |
+| **Čistá sleva** | „Hořčík −50 %. Jen do neděle.“ | teplé publikum (remarketing, zákazníci) |
+
+Sleva funguje, když je skutečná a má termín. Studenému publiku dej nejdřív důvod, pak slevu.
+Superlativ („nejlepší na trhu“) bez důkazu nepoužívej ani na Black Friday.
