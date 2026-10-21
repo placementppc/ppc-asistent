@@ -30,15 +30,18 @@ Co nenajdeš, nedomýšlej. Odpovědi zapiš do `banner-generator/banners-<klien
 
 Ke každému typu 2–3 návrhy, max. 6 slov, česky, oslovení podle brand manuálu:
 
-| Typ | Co dělá | Příklad (smyšlená kavárna na doma) |
+| Typ | Co dělá | Příklad (hořčík a spánek, Království zdraví) |
 |---|---|---|
-| **Situace** | popíše chvíli, kdy problém nastane | „Kafe z automatu? Zase?“ |
-| **Otázka na pocit** | zeptá se, co zákazník cítí | „Ráno bez energie?“ |
-| **Moment dne** | konkrétní čas nebo místo | „Pondělí, 6:40, prázdná konvice.“ |
-| **Námitka** | odpoví na důvod, proč nekoupil | „Bojíte se páky? Stačí tlačítko.“ |
-| **Výsledek** | stav po použití, bez slibu, který nejde dokázat | „Espresso doma za minutu.“ |
-| **Sebe-selekce** | osloví jednu skupinu | „Pracujete z domu?“ |
-| **Důkaz** | třetí strana, ne vy | „4,8/5 od 1 200 zákazníků“ (jen skutečné) |
+| **Situace** | popíše chvíli, ve které se zákazník pozná | „Ve tři odpoledne vás vypne jako světlo?“ |
+| **Moment** | konkrétní čas nebo místo | „Půlnoc. Tělo spí, hlava jede dál.“ |
+| **Námitka** | řekne nahlas, co si zákazník myslí; odpověď je v podnadpisu | „Další doplněk, co nic nedělá?“ |
+| **Pro koho** | osloví jednu skupinu, ostatní přeskočí | „Běháte třikrát týdně? Svaly to poznají.“ |
+| **Výsledek** | stav po použití, bez slibu, který nejde dokázat | „Konečně odpoledne bez druhého kafe.“ |
+| **Důkaz** | třetí strana, ne vy | „4,8 z 5. Hodnotí ti, co ho berou každý den.“ (jen skutečné) |
+| **Takhle ne** | vlastnost, superlativ, sleva | „Nejlepší hořčík na trhu! −50 %“ |
+
+Dobrý hook zní jako věta, kterou by řekl kamarád, ne jako slogan. Kontrola: zastavil bych se u toho já?
+Když hook jde vyměnit za jakýkoli jiný produkt v kategorii, je moc obecný.
 
 Pravidla:
 - **Situace před vlastností.** Vlastnost patří do podnadpisu, ne do hooku.

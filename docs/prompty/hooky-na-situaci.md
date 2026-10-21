@@ -17,6 +17,6 @@ Pak navrhni hooky po typech, ke každému 2–3, max. 6 slov, česky:
 - Sebe-selekce: oslovení jedné skupiny
 - Důkaz: jen skutečný, se zdrojem
 
-Pravidla: situace před vlastností produktu. Žádná sleva v hooku. Čísla, recenze a ceny jen ze zdroje. U doplňků stravy jen schválená zdravotní tvrzení EU.
+Pravidla: hook musí znít jako věta, kterou by řekl kamarád, ne jako slogan. Když jde vyměnit za jakýkoli jiný produkt v kategorii, je moc obecný. Situace před vlastností produktu. Žádná sleva v hooku. Čísla, recenze a ceny jen ze zdroje. U doplňků stravy jen schválená zdravotní tvrzení EU.
 
 Nakonec doporuč 3 hooky různých typů na test (jeden obrázek, tři nadpisy, 5–7 dní, rozhoduje cena za nákup) a napiš proč.
