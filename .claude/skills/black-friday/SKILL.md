@@ -108,8 +108,9 @@ Jak to počítá:
 
 `docs/plan-black-friday-kalkulacka.xlsx`: stejná logika po týdnech v tabulce. Na list „Data“ se vloží
 denní útrata a obrat (součet systémů, od 1. 9. loni), na „Zadání“ data Black Friday, cíl PNO a marže.
-List „Plán“ ukáže loňské týdny × trend a ve žlutém sloupci jde zkoušet navýšení: hned je vidět PNO týdne
-a **marginální PNO** (jestli se přidaná koruna vyplatí). Funguje v Excelu, Numbers i Google Tabulkách.
+List „Plán“ ukáže loňské týdny přepočtené na letošní tempo („jako teď“, výchozí bod, ne strop).
+Do žlutého sloupce **Chci utratit** se napíše vlastní částka a hned je vidět odhad obratu, PNO a
+**kolik stojí 100 Kč obratu navíc** proti marži. Funguje v Excelu, Numbers i Google Tabulkách.
 Když uživatel chce „si to naplánovat sám“ nebo potřebuje tabulku pro klienta, nabídni ji.
 
 ## 7. Navazuje
