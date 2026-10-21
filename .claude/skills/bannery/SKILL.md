@@ -89,26 +89,27 @@ npm --prefix banner-generator run reel -- <config> --probe              # reely 
 npm --prefix banner-generator run sklik -- banners-<klient>             # zmenšení na rozměry Skliku
 ```
 
-## Black Friday: nejdřív test claimů, pak BF verze vítěze
+## Black Friday: nejdřív test claimů, pak BF sada z vítěze
 
-Když uživatel chce bannery na Black Friday nebo sezónní akci, navrhni tenhle postup (vzor
-`banner-generator/configs/ukazka-black-friday.ts`):
+Vzor: `banner-generator/configs/ukazka-black-friday.ts`.
 
-1. **Test claimů (teď, 2–4 týdny před akcí).** Jeden obrázek z AI, 3 claimy, každý jiný úhel:
-   problém zákazníka / přínos / peníze nebo důkaz. První koncept obrázek generuje, ostatní mají
-   `podklad: '<slug prvního>'` a liší se jen nadpisem. Vyhraje claim, ne obrázek. Bez slevy a bez „Black Friday“.
-2. **Vyhodnocení po 5–7 dnech** v jedné sadě reklam (Meta) / jedné sestavě: rozhoduje cena za nákup,
-   ne CTR. Málo dat (pod ~20 nákupů na claim)? Řekni to a vyber podle ceny za proklik do košíku nebo CTR, s výhradou.
-3. **Black Friday verze vítěze.** Stejný obrázek (`podklad` = slug vítěze), nahoře skutečná nabídka,
-   dole termín. Další verze: Cyber Monday („poslední den“), Vánoce („doručíme do Vánoc“, bez slevy).
-   AI se nevolá, nic to nestojí. **Nabídku (sleva, termín) se vždy zeptej. Nikdy ji nevymýšlej.**
-4. Kontrola textu na každém PNG (fáze 3) a nahrání jen po schválení.
+1. **Test claimů (2–4 týdny před akcí): 3 RŮZNÉ koncepty.** Každý jiná mikro-persona × úhel × styl
+   (pravidla 3, 10 a 12 v BANNER-INSTRUCTIONS.md). Typicky: profi lifestyle foto, UGC fotka z mobilu
+   (NS5), text na obyčejném pozadí nebo post-it (NS6, NS4). **Nikdy jeden obrázek s jinými nadpisy**:
+   drobné varianty téhož čte Meta (Andromeda) jako jeden signál a účet stagnuje. Bez slevy a bez „Black Friday“.
+2. **Vyhodnocení po 5–7 dnech** podle ceny za nákup, ne CTR. Data si stáhni (API) nebo si řekni o export.
+   Pod ~20 nákupů na koncept řekni, že je to orientační.
+3. **Black Friday sada.** Vítěz se škáluje nabídkou na svém obrázku (`podklad: '<slug vítěze>'`, AI se nevolá):
+   nahoře skutečná sleva, dole termín. Cyber Monday a Vánoce dostanou **vlastní styl** (post-it se slevou,
+   dárková fotka), ne další kopii vítěze. **Nabídku (sleva, termín) se vždy zeptej. Nikdy ji nevymýšlej.**
+4. Kontrola textu na každém PNG (fáze 3). Kde AI dala papírek nebo volné místo jinam, dolaď polohu
+   textu přes `--relayout` (nic nestojí). Nahrání jen po schválení.
 
 `podklad` umí jen `generate:gemini` (ukládá surový obrázek do `_raw/`). Příkazy:
 
 ```bash
-npm --prefix banner-generator run generate:gemini -- <config> --only=T1,T2,T3 --format=1080x1080
-npm --prefix banner-generator run generate:gemini -- <config> --only=BF1,BF2,V1 --format=1080x1080
+npm --prefix banner-generator run generate:gemini -- <config> --only=T1,T2,T3 --format=1080x1350
+npm --prefix banner-generator run generate:gemini -- <config> --only=BF1,BF2,V1 --format=1080x1350
 ```
 
 ## 5. Zpátky do kampaní (jen po schválení)

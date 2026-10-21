@@ -56,7 +56,7 @@ Pravidla:
 ## 3. Výběr do testu
 
 Doporuč **3 hooky různých typů** (ne tři varianty jedné věty) a napiš proč. Ty jdou do testu claimů
-ve skillu `bannery`: jeden obrázek, tři nadpisy, vyhodnocení po 5–7 dnech podle ceny za nákup.
+ve skillu `bannery`: tři různé koncepty (každý vlastní obrázek a styl), vyhodnocení po 5–7 dnech podle ceny za nákup.
 Vítěz pak dostane Black Friday verzi se skutečnou nabídkou.
 
 Výstup: tabulka typ / hook / pro koho / proč / zdroj (u důkazu). Nic negeneruj ani nenahrávej bez schválení.

@@ -21,4 +21,4 @@ Když jde o Black Friday nebo Vánoce, přidej i hooky na situaci, kterou zákaz
 
 Pravidla: hook musí znít jako věta, kterou by řekl kamarád, ne jako slogan. Když jde vyměnit za jakýkoli jiný produkt v kategorii, je moc obecný. Situace před vlastností produktu. V testu před akcí bez slevy, testujeme důvod koupit. Žádné superlativy, které nejde doložit („nejlepší na trhu“). Čísla, recenze a ceny jen ze zdroje. U doplňků stravy jen schválená zdravotní tvrzení EU.
 
-Nakonec doporuč 3 hooky různých typů na test (jeden obrázek, tři nadpisy, 5–7 dní, rozhoduje cena za nákup) a napiš proč.
+Nakonec doporuč 3 hooky různých typů na test (každý jako jiný banner s vlastním obrázkem a stylem, 5–7 dní, rozhoduje cena za nákup) a napiš proč.
