@@ -96,6 +96,7 @@ návrhy → (po schválení) zápis.
 | `forecast` | odhad měsíce z historie účtu |
 | `black-friday` | průvodce plánem Black Friday a Vánoc po týdnech, PDF |
 | `hooky` | hooky na situaci zákazníka, 3 do testu claimů |
+| `hlidac-start` | jak začít s hlídačem: ručně, přes prohlížeč, nebo API a automatický běh s e-mailem |
 | `kryci-plan` | denní krycí plán rozpočtu a obratu, plnění k dnešku |
 | `hlidac` | náhlé výkyvy ráno / večer (jen čte) |
 | `hlidac-cilu` | plnění cílů od poslední změny + návrhy |

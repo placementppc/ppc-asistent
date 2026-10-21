@@ -21,6 +21,7 @@ napište `/start` a průvodce vás provede vším ostatním.
 | 🛍 **Black Friday a Vánoce** | Průvodce: zeptá se na cíle, akci a grafiku, vezme data z API nebo exportů (Ads, Meta, Sklik, GA4) a vyrobí plán po týdnech v PDF | „plán na Black Friday" |
 | 📅 **Denní krycí plán** | Měsíční rozpočet a obrat rozpadne na dny a systémy. Každý den porovná skutečnost s plánem a spočítá, kolik dohnat | „krycí plán na prosinec", „jsme v plánu?" |
 | 🛠 **Optimalizace** | Přes 25 skillů: vyhledávací dotazy, PMax, Seznam Nákupy, Meta strop a katalog, měření, aukce, tempo rozpočtu, tvorba kampaní a textů | „projdi účet", „co vyloučit" |
+| 🧭 **Hlídač od nuly** | Tři úrovně: ruční export a prompt, AI agent v prohlížeči, nebo API a automatický běh s e-mailem. Provede krok za krokem | „chci hlídač" |
 | 🚨 **Hlídač výkyvů** | Ráno a večer zkontroluje, jestli účet nestojí, neutíká nebo nepadají konverze | „pohlídej účty" |
 | 🎯 **Hlídač cílů** | Od poslední změny v účtu ověří, jestli plní cíl (PNO, ROAS, CPA), a navrhne další krok | „plní účet cíle?" |
 | 🚀 **Hlídač akcí** | Hledá prostor pro škálování, klidně v pátek večer a o víkendu. Jen navrhuje, nic nemění | „kde přidat?" |
