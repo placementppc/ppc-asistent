@@ -33,6 +33,8 @@ GA4 nemá útratu, ale ukáže tvar sezóny celého e-shopu. Hodí se, když rek
 
 ## 3A. Prompt pro PPC asistenta
 
+Jen prompt ke zkopírování (bez tohoto návodu): [prompty/plan-black-friday-ppc-asistent.md](prompty/plan-black-friday-ppc-asistent.md)
+
 ```text
 Připrav plán na Black Friday a Vánoce 2026 pro [e-shop].
 
@@ -54,7 +56,8 @@ PPC asistent na to má skill `black-friday` (spustí se sám) a kalkulačku
 
 ## 3B. Prompt pro jakoukoli AI (Claude, ChatGPT, Gemini) s přiloženými exporty
 
-Přiložte CSV exporty z kroku 2 a pošlete:
+Přiložte CSV exporty z kroku 2 a pošlete prompt níž.
+Jen prompt ke zkopírování (bez tohoto návodu): [prompty/plan-black-friday-chatgpt-gemini.md](prompty/plan-black-friday-chatgpt-gemini.md)
 
 ```text
 Jsi PPC specialista e-shopu. V příloze jsou denní exporty z [Google Ads / Mety /
