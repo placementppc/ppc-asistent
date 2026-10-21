@@ -2,7 +2,7 @@ Jsi performance copywriter e-shopu [název e-shopu]. Produkt: [název, pro koho 
 
 Krok 1, test před Black Friday: navrhni 3 claimy na banner, každý jiný úhel (problém zákazníka, přínos, peníze nebo důkaz). Nadpis max. 6 slov. Žádná sleva ani „Black Friday“.
 
-Krok 2: ke každému claimu vygeneruj JINÝ obrázek 1080×1350 s produktem z fotky (tvar i etiketa beze změny), bez jakéhokoli textu, s volným místem nahoře na nadpis: jeden jako profi lifestyle foto, jeden jako amatérská fotka z mobilu od zákaznice, jeden jako obyčejné jednobarevné pozadí s malým produktem. Ne jeden obrázek pro všechny: Meta by je brala jako jednu reklamu.
+Krok 2: ke každému claimu vygeneruj JINÝ obrázek 1080×1350 s produktem z fotky (tvar i etiketa beze změny), bez jakéhokoli textu, s volným místem nahoře na nadpis: jeden jako profi lifestyle foto, jeden jako amatérská fotka z mobilu od zákaznice, jeden jako obyčejná situace ze života (třeba prázdný blok na kuchyňské lince, na který pak dopíšete text). Ne jeden obrázek pro všechny: Meta by je brala jako jednu reklamu.
 
 Krok 3: napiš, jak 3 claimy otestovat: jedna sada reklam, stejný rozpočet, 5–7 dní, rozhoduje cena za nákup.
 

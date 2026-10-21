@@ -95,7 +95,8 @@ Vzor: `banner-generator/configs/ukazka-black-friday.ts`.
 
 1. **Test claimů (2–4 týdny před akcí): 3 RŮZNÉ koncepty.** Každý jiná mikro-persona × úhel × styl
    (pravidla 3, 10 a 12 v BANNER-INSTRUCTIONS.md). Typicky: profi lifestyle foto, UGC fotka z mobilu
-   (NS5), text na obyčejném pozadí nebo post-it (NS6, NS4). **Nikdy jeden obrázek s jinými nadpisy**:
+   (NS5), nativní obrázek ze života: ručně psaný seznam úkolů, post-it, zpráva (NS7, NS4, NS1).
+   Prázdné pozadí s malým produktem nestačí: na obrázku musí být situace, ve které se zákazník pozná. **Nikdy jeden obrázek s jinými nadpisy**:
    drobné varianty téhož čte Meta (Andromeda) jako jeden signál a účet stagnuje. Bez slevy a bez „Black Friday“.
 2. **Vyhodnocení po 5–7 dnech** podle ceny za nákup, ne CTR. Data si stáhni (API) nebo si řekni o export.
    Pod ~20 nákupů na koncept řekni, že je to orientační.

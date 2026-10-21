@@ -2,7 +2,7 @@
  * UKÁZKA BLACK FRIDAY — smyšlená značka „Kávovar Ranní" (stejná jako configs/ukazka.ts).
  *
  * 1. TEST CLAIMŮ (T1–T3): 3 RŮZNÉ koncepty. Každý jiná mikro-persona × úhel × styl:
- *    profi lifestyle foto, UGC fotka z mobilu, text na obyčejném pozadí.
+ *    profi lifestyle foto, UGC fotka z mobilu, nativní obrázek ze života (ručně psaný seznam úkolů).
  *    NE jeden obrázek s jinými nadpisy: drobné varianty téhož čte Meta (Andromeda) jako jeden
  *    signál a účet stagnuje (BANNER-INSTRUCTIONS.md, pravidla 3, 10 a 12).
  * 2. BLACK FRIDAY (BF1, BF2, V1): vítěz testu se škáluje nabídkou na svém obrázku (BF1, `podklad`,
@@ -77,17 +77,29 @@ ${KONEC(f)}`,
   ],
 };
 
-// T3 — text na obyčejném pozadí, sebe-selekce (native-static NS6)
+// T3 — ručně psaný seznam úkolů na lince (native-static NS7: sdělení v reálném kontextu)
 // PERSONA: home-office · ÚHEL: identity · BUŇKA: home-office × identity × native-static
+// Ruční písmo (např. Caveat z Google Fonts) dej do brand/fonts; bez něj se seznam vysází běžným písmem.
+// Kam AI blok položí, se liší: polohu textu dolaď přes --relayout.
+const RUKA_FONT = path.join(DIR, 'brand', 'fonts', 'Caveat-VF.ttf');
+const ruka = fs.existsSync(RUKA_FONT) ? { fontFile: RUKA_FONT, fontFamily: 'Caveat' } : font;
 const T3: Concept = {
   id: 'T3', slug: 'bf-test-t3', getReference: ref,
   buildPrompt: f => `Image ${f.width}x${f.height} pixels.
-${nativeStaticStyle('NS6', { palette: `flat cream ${C.krem}`, product: 'the espresso machine small in the lower right corner' })}
+${nativeStaticStyle('NS7', {
+    product: 'the espresso machine on the desk to the right of the notepad',
+    scene: 'top-down smartphone photo of a home-office desk on a Monday morning: a LARGE blank lined notepad (completely empty, '
+      + 'no writing) in the left half, covering roughly x 6–62%, y 14–80%; a laptop corner, a pen, an empty coffee cup. Real, slightly messy.',
+  })}
 ${NATIVE_STATIC_RULES}
-COMPOSITION: upper 65% completely empty flat background.
 ${KONEC(f)}`,
-  overlays: [nadpis(['Pracujete z domu', 'a kafe si chodíte', 'kupovat ven?'], 0.09, C.espresso, 84),
-    pod(['Espresso za minutu, bez fronty.'], 0.45)],
+  overlays: [
+    { lines: ['Pondělí'], xPct: 0.12, yPct: 0.2, fontSize: 60, color: '#1d3a8a', weight: 700, ...ruka },
+    { lines: ['– call v 8:30', '– odpovědět na maily', '– zajít si pro kafe', '– zase zajít si pro kafe'],
+      xPct: 0.12, yPct: 0.29, fontSize: 42, lineHeight: 1.4, color: '#1d3a8a', weight: 500, ...ruka },
+    { lines: ['Pracujete z domu a kafe si chodíte kupovat ven?'], xPct: 0.05, yPct: 0.035, fontSize: 36, color: C.bila,
+      weight: 800, ...font, scrim: { from: 'top', heightPct: 0.12, opacity: 0.55 } },
+  ],
 };
 
 const vitez = { T1, T2, T3 }[VITEZ] as Concept;
