@@ -3,7 +3,7 @@
  *
  * Běží u Googlu, takže hlídá i v sobotu večer se zavřeným počítačem.
  * Ráno porovná včerejšek s běžným dnem (medián 28 dní), večer pohlídá,
- * jestli dnešek neutíká nebo nestojí. E-mail pošle JEN když něco svítí.
+ * jestli dnešek neutíká nebo nestojí. E-mail pošle JEN když je problém.
  *
  * Stejná pravidla jako scripts/hlidac/kontroly.py (PPC asistent, skill /hlidac).
  *

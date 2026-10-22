@@ -155,7 +155,7 @@ jobs:
       # Kam posílat, si vybíráš sám: e-mail, Slack, Telegram, Teams, Discord, ntfy…
       # Přehled a co je potřeba: docs/notifikace.md. Svému Claude Code řekni:
       #   „napoj notifikace hlídače v GitHub Actions na Slack podle docs/notifikace.md"
-      # Ukázka (Slack Incoming Webhook, posílá jen když něco svítí):
+      # Ukázka (Slack Incoming Webhook, posílá jen když je problém):
       # - name: Notifikace
       #   if: steps.beh.outputs.exit != '0'
       #   env:
@@ -182,7 +182,7 @@ jobs:
       #     prompt: |
       #       Přečti hlidac-vystup.txt a reporty v reports/. Každý 🔴 nález projdi postupem
       #       skillu anomalie jen čtecími skripty. V účtech NIC neměň, nic nespouštěj s --apply
-      #       ani --confirm. Výsledek napiš do reports/analyza.md: nahoře kolik účtů svítí,
+      #       ani --confirm. Výsledek napiš do reports/analyza.md: nahoře kolik účtů má problém,
       #       pod tím ke každému 1–2 věty (co, ověřená příčina, návrh). Domněnky označ.
       #     claude_args: |
       #       --max-turns 30

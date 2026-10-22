@@ -10,7 +10,7 @@ description: >
 
 # Hlídač: jak začít
 
-Hlídač každé ráno porovná včerejšek s běžným dnem a ukáže jen to, co svítí. Ve výchozím stavu
+Hlídač každé ráno porovná včerejšek s běžným dnem a ukáže jen problémy. Ve výchozím stavu
 **jen čte**, do účtů nesahá. Dá se rozjet ve třech úrovních. Začni nižší a přidávej.
 
 ## 1. Zeptej se (jedno kolo)
@@ -58,7 +58,7 @@ Podle odpovědí doporuč úroveň a řekni proč, jednou větou.
    - **Vercel cron:** když už máte Vercel Pro (Hobby jen 1× denně a jen nekomerčně). Šablona `deploy/vercel/`.
    - **Google Ads skript** `scripts/google_ads_scripts/ucet_hlidac.js`: jen Google Ads, ale běží u Googlu
      každou hodinu a e-mail pošle sám. Dobrá pojistka na víkend.
-4. **E-mail:** podle `docs/notifikace.md` (Resend nebo Gmail), jen když něco svítí.
+4. **E-mail:** podle `docs/notifikace.md` (Resend nebo Gmail), jen když je problém.
 5. Na konci jeden zkušební běh a ukázka, jak vypadá e-mail.
 
 ## Pravidla

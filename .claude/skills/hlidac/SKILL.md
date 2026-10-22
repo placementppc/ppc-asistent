@@ -1,6 +1,6 @@
 ---
 name: hlidac
-description: Denní hlídač reklamních účtů (Sklik, Meta, Google Ads) — ráno projde vybrané účty, porovná včerejšek s běžným dnem a nahlásí jen ty, které svítí (stojí, utíkají, propad zobrazení, skok CPC, nula konverzí, zamítnuté reklamy, zablokovaný účet). Večer pohlídá, jestli dnešek neutíká. Rozcestník i pro hlídač cílů a hlídač akcí a pro konfiguraci clients/hlidac-ucty.json (které účty, frekvence, cíle, limity). Použij, když uživatel řekne „hlídač", „pohlídej účty", „ranní kontrola účtů", „projdi účty jestli něco nehoří", „pohlídej to přes víkend", „nastav denní hlídání", „přidej účet do hlídače", „jak často hlídat", nebo když ho spustí naplánovaná úloha. Jen čte, nic nemění.
+description: Denní hlídač reklamních účtů (Sklik, Meta, Google Ads) — ráno projde vybrané účty, porovná včerejšek s běžným dnem a nahlásí jen ty, které mají problém (stojí, utíkají, propad zobrazení, skok CPC, nula konverzí, zamítnuté reklamy, zablokovaný účet). Večer pohlídá, jestli dnešek neutíká. Rozcestník i pro hlídač cílů a hlídač akcí a pro konfiguraci clients/hlidac-ucty.json (které účty, frekvence, cíle, limity). Použij, když uživatel řekne „hlídač", „pohlídej účty", „ranní kontrola účtů", „projdi účty jestli něco nehoří", „pohlídej to přes víkend", „nastav denní hlídání", „přidej účet do hlídače", „jak často hlídat", nebo když ho spustí naplánovaná úloha. Jen čte, nic nemění.
 ---
 
 # Hlídač účtů
@@ -72,7 +72,7 @@ python3 scripts/hlidac/hlidac.py --dnes   # večer: utíká dnešek, nebo stojí
 | Útrata utíká | 🔴 | včera přes 160 % běžného dne |
 | Nula konverzí | 🔴 | běžně aspoň 2 denně, včera 0 |
 | Účet nejde načíst / zablokovaný | 🔴 | chyba API, Meta `account_status` ≠ 1 |
-| Propad zobrazení | 🟡 | pod 50 % běžného dne (když útrata nesvítí) |
+| Propad zobrazení | 🟡 | pod 50 % běžného dne (když je útrata v normálu) |
 | Skok CPC | 🟡 | o 40 % dráž, jen při 20+ proklicích |
 | Propad konverzí | 🟡 | pod 40 % běžného dne, jen u účtů s 5+ denně |
 | Zamítnuté reklamy | 🟡 | Meta `DISAPPROVED`, Google aktivní reklamy `DISAPPROVED` |
@@ -88,7 +88,7 @@ Prahy jsou záměrně volné. Hlídač, který píská každý den, přestane n�
    trh a sezóna → aukce), jen čtecími skripty. U „utíká" se nejdřív podívej na historii změn
    (Google `change_event`, Meta activity log), u „stojí" na platbu/kredit, zamítnutí a stav kampaní.
 3. **Příčinu piš jen ověřenou.** Co nevíš, označ jako domněnku (CLAUDE.md tvrdé pravidlo 1).
-4. **Report stručně:** nahoře „🔴 X účtů svítí / ✅ vše v pořádku", pod tím ke každému svítícímu
+4. **Report stručně:** nahoře „🔴 X účtů má problém / ✅ vše v pořádku", pod tím ke každému problémovému
    účtu 1–2 věty: co se stalo, ověřená příčina, návrh kroku. Detail jen do `clients/<klient>.md`.
 5. **Návrh změny jen jako návrh.** Nic nespouštěj. Klientský soubor doplň jen o datum a nález.
 6. Ráno se hodí pustit i hlídač cílů (skill `hlidac-cilu`): výkyvy říkají „co se stalo včera",

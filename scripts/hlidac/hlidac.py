@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Hlídač účtů — denně projde vybrané účty (Sklik, Meta, Google Ads) a nahlásí jen ty, které svítí.
+"""Hlídač účtů — denně projde vybrané účty (Sklik, Meta, Google Ads) a nahlásí jen ty, které mají problém.
 
 Jen čte. V účtech nic nemění.
 
@@ -109,7 +109,7 @@ def main() -> int:
     if not svitici:
         souhrn = f"✅ Všech {len(v_poradku)} účtů v pořádku."
     else:
-        souhrn = f"{'🔴' if cervene else '🟡'} Svítí {len(svitici)} z {len(svitici) + len(v_poradku)} účtů."
+        souhrn = f"{'🔴' if cervene else '🟡'} Problém má {len(svitici)} z {len(svitici) + len(v_poradku)} účtů."
     radky = [f"# {nadpis}", "", souhrn, ""]
     for jmeno, nalezy in sorted(svitici, key=lambda x: -sum(n.uroven == k.CERVENA for n in x[1])):
         radky.append(f"## {jmeno}")

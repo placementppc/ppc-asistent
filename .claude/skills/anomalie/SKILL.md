@@ -63,6 +63,6 @@ pořadí. Nikdy nezačíná úpravou nabídek.
 
 Denní běh přes naplánovanou úlohu nebo cron: čerpání rozpočtu, propady zobrazení a jejich
 důvod (rozpočet / rank / zamítnutí), výkyvy CTR a CPC, tempo 7 / 14 / 30 dní. Výstup do
-Slacku nebo e-mailu jen pro účty, které svítí. Pro PMax existuje hotový Google Ads skript
+Slacku nebo e-mailu jen pro účty, které mají problém. Pro PMax existuje hotový Google Ads skript
 `scripts/google_ads_scripts/pmax_hlidac.js`. Kontrola každých pár minut stojí peníze a nic
 nepřinese, denně stačí.

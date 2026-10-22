@@ -40,8 +40,8 @@ nezakládej, nepauzuj, neměň rozpočty. Jen čti a navrhuj.
    web a nabídka → trh a sezóna → aukce), jen čtecími skripty. U hlídače cílů a akcí ber
    návrhy z reportu, ověř je v datech a nic nespouštěj.
 5. Výsledek napiš do reports/analyza-<datum>-<REŽIM>.md:
-   - nahoře „🔴 X účtů svítí" nebo „✅ vše v pořádku",
-   - ke každému svítícímu účtu 1–2 věty: co se stalo, ověřená příčina, návrh kroku,
+   - nahoře „🔴 X účtů má problém" nebo „✅ vše v pořádku",
+   - ke každému účtu s problémem 1–2 věty: co se stalo, ověřená příčina, návrh kroku,
    - co jsi neověřil, označ jako domněnku.
 6. Notifikace: zatím žádná. (Když ji napojíš podle docs/notifikace.md, doplň sem krok
    „pošli shrnutí z bodu 5 na <kanál>".)

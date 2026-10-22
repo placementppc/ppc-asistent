@@ -45,7 +45,7 @@ description: >
 ## Automatizace pravidelných úloh (zkušenost týmu)
 
 - **Ranní hlídač:** čerpání rozpočtu, propady zobrazení a jejich důvod, výkyvy CTR,
-  tempo 7 / 14 / 30 dní. Specialista otevře jen účty, které svítí.
+  tempo 7 / 14 / 30 dní. Specialista otevře jen účty, které mají problém.
 - **Akce na jeden pokyn:** promo reklama a rozšíření do všech vyhledávacích kampaní
   v Google i Skliku s datem konce. Kde systém konec neumí, naplánovat vypnutí (cron ve 23:55).
   Po akci stáhnout nabídky v remarketingu. Texty vždy lidsky zkontrolovat, AI si domýšlí podmínky.

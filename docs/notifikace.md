@@ -16,9 +16,9 @@ naplánované úlohy).
 
 - **Webhook URL a tokeny jsou tajemství.** Kdo je zná, může ti posílat zprávy do kanálu
   (u některých i číst). Patří jen do `.env` / Secrets, nikdy do kódu, repa ani do chatu.
-- **Posílej shrnutí, ne celý report.** Stačí „🔴 2 účty svítí" + 1–2 věty ke každému.
+- **Posílej shrnutí, ne celý report.** Stačí „🔴 2 účty mají problém" + 1–2 věty ke každému.
   Celý report zůstane v `reports/`.
-- **Posílej hlavně, když něco svítí** (kód 1 nebo 2). Kanál, který pípá každý den „vše OK",
+- **Posílej hlavně, když je problém** (kód 1 nebo 2). Kanál, který pípá každý den „vše OK",
   přestaneš číst. Jedno ranní „✅ vše v pořádku" je v pohodě.
 - **Do cizích nástrojů neposílej data klientů pod NDA**, pokud to smlouva nedovoluje
   (`docs/nda-rezim.md`). Názvy účtů nahraď zkratkou.
@@ -106,7 +106,7 @@ naplánované úlohy).
 - **Jak se posílá (ověřeno):** `POST` na `https://ntfy.sh/<tema>` s textem zprávy.
 - **Bezpečnost:** bez registrace je **název tématu heslo** — kdo ho uhodne, čte tvoje zprávy.
   Zvol dlouhý náhodný název. Kvůli tomu na veřejném ntfy.sh neposílej názvy klientů ani čísla,
-  jen „🔴 hlídač: 2 účty svítí, mrkni do reportu".
+  jen „🔴 hlídač: 2 účty mají problém, mrkni do reportu".
 - **Docs:** [Publishing](https://docs.ntfy.sh/publish/)
 
 ### Pushover
