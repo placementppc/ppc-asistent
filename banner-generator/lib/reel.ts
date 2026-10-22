@@ -77,7 +77,7 @@ export interface Reel {
 export interface SceneSpec {
   /** Název souboru bez přípony, uloží se do <outDir>/_assets/<file>.png */
   file: string;
-  /** Anglický prompt pro gpt-image-2. NIKDY nesmí obsahovat text, produkt ani lidi. */
+  /** Anglický prompt pro obrazový model OpenAI (lib/modely.ts). NIKDY nesmí obsahovat text, produkt ani lidi. */
   prompt: string;
 }
 

@@ -27,6 +27,7 @@ import { createRequire } from 'module';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import { GEMINI_MODELY, modelyZArgumentu, neznamyModel } from './lib/modely';
 
 const require = createRequire(import.meta.url);
 
@@ -59,6 +60,12 @@ const eyesArg = args.find(a => a.startsWith('--eyes='))?.split('=')[1];
 const smokeArg = args.find(a => a.startsWith('--smoke='))?.split('=')[1];
 // --slam = nadpis „přiletí a bouchne" (úderový nálet: zvětšený → dosedne s překmitem + otřes + náraz).
 const slam = args.includes('--slam');
+// --layers = vrstvy z generátoru (`generate:gemini … --layers` → `_layers/`): podklad bez textu, nadpis a zbytek
+// textu jsou přesně ty, ze kterých banner vznikl. Žádné odstranění textu přes Gemini, žádné ošklivé okraje.
+const useLayers = args.includes('--layers');
+// --glint-rect=l,t,r,b = přejezd světla jen přes tenhle obdélník (podíly), typicky přes produkt.
+const glintRectArg = args.find(a => a.startsWith('--glint-rect='))?.split('=')[1];
+let glintRect: { l: number; t: number; r: number; b: number } | null = null;
 // --flare=66,18 = pozice jiskry v % (x,y). Default = pravý horní roh fotky.
 const flareArg = args.find(a => a.startsWith('--flare='))?.split('=')[1];
 // --photo=0.43 = podíl výšky, kam až sahá horní fotka (jinak auto-detekce tmavého panelu).
@@ -77,7 +84,9 @@ const textPath = path.join(dir, `${base}_anim-text.png`);      // celý text (re
 const headPath = path.join(dir, `${base}_anim-text-head.png`); // horní nadpis (animuje se)
 const restPath = path.join(dir, `${base}_anim-text-rest.png`); // zbytek textu (statický)
 const bgPath = path.join(dir, `${base}_anim-bg.png`);          // pozadí s vyčištěnou oblastí nadpisu
-const outputFile = path.join(dir, `${base}_animated.mp4`);
+// --name=jemna → `<banner>_animated-jemna.mp4` (víc verzí téhož banneru vedle sebe)
+const nameArg = args.find(a => a.startsWith('--name='))?.split('=')[1]?.replace(/[^a-z0-9-]/gi, '');
+const outputFile = path.join(dir, `${base}_animated${nameArg ? `-${nameArg}` : ''}.mp4`);
 
 // ---------- ffmpeg lokace ----------
 function resolveFfmpeg(): string {
@@ -118,7 +127,9 @@ function loadApiKey(): string {
   return key;
 }
 
-const MODEL = 'gemini-3.1-flash-image-preview';
+// Nejnovější model s pojistkou (lib/modely.ts); vynutit jiný: --model=…
+const MODELY = modelyZArgumentu(args, GEMINI_MODELY);
+let modelIdx = 0;
 
 const REMOVE_TEXT_PROMPT = `You are editing an advertising banner image. Remove ALL text from the image — every headline, sub-headline, caption, button label, price, number, letter and any typographic word-mark. Reconstruct the background that was behind the removed text completely naturally and seamlessly: match the surrounding colors, gradients, textures, lighting and patterns so there is absolutely no trace, smudge or blur where text used to be. Do NOT move, resize, recolor or remove any product, person, illustration, photo or non-text graphic element — keep every non-text pixel identical. Keep the exact same dimensions and aspect ratio. Output only the cleaned image.`;
 
@@ -129,7 +140,8 @@ async function generatePlate(): Promise<void> {
   }
   const apiKey = loadApiKey();
   // Klíč jde v hlavičce x-goog-api-key, ne v URL — URL se objevuje v chybových hláškách a logu.
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
+  // v1beta: Nano Banana 2.1 je k dispozici jen tady (v1 vrací 404), starší modely jedou taky.
+  const endpoint = () => `https://generativelanguage.googleapis.com/v1beta/models/${MODELY[modelIdx]}:generateContent`;
   const data = fs.readFileSync(pngPath).toString('base64');
   const ext = path.extname(pngPath).toLowerCase();
   const inMime = ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg' : ext === '.webp' ? 'image/webp' : 'image/png';
@@ -148,13 +160,20 @@ async function generatePlate(): Promise<void> {
   let lastErr = '';
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const res = await fetch(endpoint, {
+      const res = await fetch(endpoint(), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
         body: JSON.stringify(body),
       });
       if (!res.ok) {
-        lastErr = `HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`;
+        const txt = await res.text();
+        if (neznamyModel(res.status, txt) && modelIdx < MODELY.length - 1) {
+          console.warn(`   ⚠️  Model ${MODELY[modelIdx]} API nezná, přepínám na ${MODELY[modelIdx + 1]}.`);
+          modelIdx++;
+          attempt--;
+          continue;
+        }
+        lastErr = `HTTP ${res.status}: ${txt.slice(0, 300)}`;
         await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
         continue;
       }
@@ -342,6 +361,7 @@ function buildHtml(width: number, height: number, mode: 'none' | 'all' | 'head',
   const sparkleDivs = sparkles.map(() => '<div class="sparkle"></div>').join('\n');
 
   const layerImg = `width: ${width}px; height: ${height}px; display: block;`;
+  const tall = height / width > 1.5; // Stories/Reels 9:16
   const rise = Math.round(height * 0.035);
 
   // Sestavení textových vrstev podle režimu:
@@ -360,7 +380,24 @@ function buildHtml(width: number, height: number, mode: 'none' | 'all' | 'head',
 .text-rest { position: absolute; top: 0; left: 0; z-index: 6; }
 .text-rest img { ${layerImg} }
 
-${slam ? `
+${slam && tall ? `
+/* Stories/Reels: PŘILETÍ A BOUCHNE BEZ ZVĚTŠOVÁNÍ (pravidlo 9) — nadpis spadne shora, tvrdě dosedne
+   a dvakrát odskočí; jen translateY + krátký otřes, žádný scale. Štítek s nabídkou a zbytek textu leží NAD
+   padajícím nadpisem (z-index), takže ho nadpis při pádu nepřejede. */
+.text-rest { z-index: 8 !important; }
+.text-head { position: absolute; top: 0; left: 0; z-index: 7; opacity: 0; transform: translateY(-${Math.round(height * 0.07)}px); animation: headDrop 0.95s 0.6s linear forwards; }
+.text-head img { ${layerImg} }
+@keyframes headDrop {
+  0%   { opacity: 0; transform: translateY(-${Math.round(height * 0.07)}px); animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45); }
+  22%  { opacity: 1; }
+  42%  { opacity: 1; transform: translateY(0); animation-timing-function: cubic-bezier(0, 0.55, 0.45, 1); } /* DOSEDNUTÍ — náraz */
+  58%  { transform: translateY(-26px); animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45); }
+  72%  { transform: translateY(0); animation-timing-function: cubic-bezier(0, 0.55, 0.45, 1); }
+  82%  { transform: translateY(-8px); animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45); }
+  90%  { transform: translateY(0) translateX(-3px); }
+  95%  { transform: translateY(0) translateX(2px); }
+  100% { opacity: 1; transform: translateY(0); }
+}` : slam ? `
 /* horní nadpis — PŘILETÍ A BOUCHNE: zvětšený dolétne, dosedne s nárazem a překmitem */
 .text-head { position: absolute; top: 0; left: 0; z-index: 7; opacity: 0; transform: scale(1.6); transform-origin: ${headCenter ? headCenter.cx : 50}% ${headCenter ? headCenter.cy : 50}%; animation: headSlam 0.8s 0.6s cubic-bezier(0.55, 0, 0.85, 0.2) forwards; }
 .text-head img { ${layerImg} }
@@ -395,19 +432,24 @@ ${slam ? `
   }
 
   // glint = přejezd slunečního světla přes horní fotku + jiskra (lens-flare). Nahrazuje plošný shimmer.
-  const beamOp = strong ? 1.0 : 0.85;
+  const beamOp = glintRect ? (strong ? 0.75 : 0.55) : (strong ? 1.0 : 0.85); // přes produkt jemněji
+  const flareK = glintRect ? 0.6 : 1; // menší jiskra, když světlo jede jen přes produkt
   const glintCss = glintCfg ? `
-.glint { position: absolute; top: 0; left: 0; width: ${width}px; height: ${glintCfg.photoH}px; overflow: hidden; pointer-events: none; z-index: 8; }
-.glint-beam { position: absolute; top: -20%; left: -50%; width: 26%; height: 140%; transform: rotate(10deg); filter: blur(5px); opacity: 0;
+.glint { position: absolute; ${glintRect
+    ? `left: ${Math.round(width * glintRect.l)}px; top: ${Math.round(height * glintRect.t)}px; width: ${Math.round(width * (glintRect.r - glintRect.l))}px; height: ${Math.round(height * (glintRect.b - glintRect.t))}px; mix-blend-mode: screen;
+  /* okraje obdélníku se plynule rozplynou, žádné useknuté konce paprsku */
+  -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent 100%); mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);`
+    : `top: 0; left: 0; width: ${width}px; height: ${glintCfg.photoH}px;`} overflow: hidden; pointer-events: none; z-index: 8; }
+.glint-beam { position: absolute; top: -20%; left: -50%; width: ${glintRect ? 34 : 26}%; height: 140%; transform: rotate(10deg); filter: blur(${glintRect ? 12 : 5}px); opacity: 0;
   background: linear-gradient(90deg, transparent 0%, rgba(255,246,220,0) 18%, rgba(255,251,238,${beamOp}) 50%, rgba(255,246,220,0) 82%, transparent 100%);
   animation: glintSweep 1.8s 1.9s ease-in-out forwards; }
 @keyframes glintSweep { 0% { left: -50%; opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { left: 125%; opacity: 0; } }
 .flare { position: absolute; left: ${glintCfg.fx}%; top: ${glintCfg.fy}%; width: 0; height: 0; z-index: 9; pointer-events: none; }
 .flare::before, .flare::after { content: ''; position: absolute; transform: translate(-50%,-50%) scale(0.3); opacity: 0; }
-.flare::before { width: 200px; height: 200px; border-radius: 50%;
+.flare::before { width: ${Math.round(200 * flareK)}px; height: ${Math.round(200 * flareK)}px; border-radius: 50%;
   background: radial-gradient(circle, rgba(255,250,235,1) 0%, rgba(255,238,205,0.6) 22%, rgba(255,230,190,0.18) 45%, transparent 70%);
   animation: flarePulse 2.6s 2.05s ease-in-out forwards; }
-.flare::after { width: 300px; height: 300px;
+.flare::after { width: ${Math.round(300 * flareK)}px; height: ${Math.round(300 * flareK)}px; opacity: 0;
   background:
     linear-gradient(0deg, transparent 47%, rgba(255,251,238,0.95) 50%, transparent 53%),
     linear-gradient(90deg, transparent 47%, rgba(255,251,238,0.95) 50%, transparent 53%),
@@ -452,7 +494,7 @@ ${puffDelays.map((d, i) => `.smoke span:nth-child(${i + 1}) { animation: puff 2.
 .impact::before { content: ''; position: absolute; opacity: 0; transform: translate(-50%,-50%) scaleX(0.15) scaleY(0.4);
   width: ${Math.round(width * 0.55)}px; height: 44px; border-radius: 50%;
   background: radial-gradient(ellipse, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.14) 45%, transparent 72%);
-  animation: impactBurst 0.55s 0.92s ease-out forwards; }
+  animation: impactBurst 0.55s ${tall ? "0.98s" : "0.92s"} ease-out forwards; }
 @keyframes impactBurst {
   0%   { opacity: 0;   transform: translate(-50%,-50%) scaleX(0.15) scaleY(0.4); }
   25%  { opacity: 0.8; }
@@ -490,8 +532,9 @@ body { width: ${width}px; height: ${height}px; overflow: hidden; background: #00
 ${textLayerCss}
 
 /* shimmer — světelný přejezd přes banner */
-.shimmer { position: absolute; top: 0; left: -80%; width: 45%; height: 100%;
-  background: linear-gradient(105deg, transparent 0%, rgba(255,255,255,0.04) 40%, rgba(255,255,255,${strong ? '0.12' : '0.08'}) 50%, rgba(255,255,255,0.04) 60%, transparent 100%);
+.shimmer { position: absolute; top: -10%; left: -80%; width: 45%; height: 120%; transform: skewX(-15deg);
+  /* vodorovný přechod s průhlednými konci (šikmý dělal na okraji prvku viditelnou svislou hranu); úhel dává skewX */
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,${strong ? '0.12' : '0.08'}) 50%, rgba(255,255,255,0.04) 70%, transparent 100%);
   animation: shimmerSweep ${strong ? '2.8s' : '3.2s'} 1.6s ease-in-out ${strong ? 'infinite' : 'forwards'}; pointer-events: none; z-index: 8; }
 @keyframes shimmerSweep { 0% { left: -50%; } 100% { left: 130%; } }
 
@@ -597,6 +640,22 @@ async function main() {
 
   if (mode === 'none') {
     console.log('⏭️  --no-text: jen ambient pohyb celého banneru, text se nevrství.');
+  } else if (useLayers) {
+    const ldir = path.join(dir, '_layers');
+    const lp = (k: string) => path.join(ldir, `${base}_${k}.png`);
+    for (const k of ['plate', 'head', 'rest']) {
+      if (!fs.existsSync(lp(k))) {
+        console.error(`Chybí vrstva ${lp(k)}. Nejdřív: npm run generate:gemini -- <config> --only=<ID> --format=${width}x${height} --relayout --layers`);
+        process.exit(1);
+      }
+    }
+    fs.copyFileSync(lp('head'), headPath);
+    fs.copyFileSync(lp('rest'), restPath);
+    bgImg = lp('plate');
+    const { info } = await sharp(lp('head')).trim().toBuffer({ resolveWithObject: true });
+    const l = -(info.trimOffsetLeft ?? 0), t = -(info.trimOffsetTop ?? 0);
+    headCenter = { cx: ((l + info.width / 2) / width) * 100, cy: ((t + info.height / 2) / height) * 100 };
+    console.log(`   ✅ vrstvy z generátoru (_layers/): nadpis x${l}–${l + info.width} y${t}–${t + info.height}, bez odmaskování`);
   } else {
     await generatePlate();
     const res = await computeTextAlpha(width, height);
@@ -635,7 +694,14 @@ async function main() {
 
   // glint = přejezd slunce přes horní fotku + jiskra
   let glintCfg: { photoH: number; fx: number; fy: number } | null = null;
-  if (glint) {
+  if (glint && glintRectArg) {
+    const [l, t, r, b] = glintRectArg.split(',').map(parseFloat);
+    glintRect = { l, t, r, b };
+    let fx = (l + (r - l) * 0.72) * 100, fy = (t + (b - t) * 0.18) * 100;
+    if (flareArg) { const [a, c] = flareArg.split(',').map(parseFloat); fx = a; fy = c; }
+    glintCfg = { photoH: height, fx, fy };
+    console.log(`   ✨ glint jen přes obdélník ${glintRectArg}, jiskra na ${fx.toFixed(0)}%,${fy.toFixed(0)}%`);
+  } else if (glint) {
     if (!origRaw) origRaw = await sharp(pngPath).removeAlpha().resize(width, height, { fit: 'fill' }).raw().toBuffer();
     const photoH = Number.isFinite(photoArg) ? Math.round(height * photoArg) : detectPhotoBottom(origRaw, width, height);
     let fx = 66, fy = 18;
@@ -656,7 +722,7 @@ async function main() {
   const html = buildHtml(width, height, mode, glintCfg, bgImg, smokeCfg, headCenter);
   await renderMp4(html, width, height);
 
-  if (mode !== 'none') {
+  if (mode !== 'none' && !useLayers) {
     console.log(`\n💡 Mezivýstupy ke kontrole: ${path.basename(platePath)} + textové vrstvy`);
     console.log('   Nadpis sedí špatně? Uprav pás: --head-band=0.47,0.64. Ošklivé okraje? --threshold=60.');
   }

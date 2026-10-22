@@ -46,6 +46,11 @@ export type TextOverlay = {
   // instalace do systému. Variabilní font dostane váhu z `weight`, statický řez se použije,
   // jak je. yPct je pak HORNÍ hrana textu (ne účaří).
   fontFile?: string;
+  letterSpacing?: number; // prostrkání v em (jen s fontFile): −0.015 sevřený nadpis
+  // 'head' = hlavní nadpis; při exportu vrstev pro video (--layers) jde do samostatné vrstvy, která přiletí.
+  role?: 'head';
+  // Přeškrtnutí řádku (typografický seznam „hotovo“). Jen jednořádkové overlaye s fontFile.
+  preskrtnuti?: { color?: string; width?: number };
   // Tmavý přechod pod textem, aby zůstal čitelný i nad fotkou. Bez něj text padne
   // na cokoli, co model do té části obrazu nakreslí (u fotoscén typicky produkt).
   // 'top' | 'bottom' = odkud přechod nabíhá; hodnota je podíl výšky banneru.
@@ -67,7 +72,13 @@ export type TextOverlay = {
     // Dotáhne pruh až na hranu plátna. Bez toho pod pruhem zůstane proužek fotky,
     // což vypadá jako nedodělek. Text si drží svoji pozici.
     toEdge?: 'top' | 'bottom';
+    // Zaoblení rohů v px, nebo 'pill' = půlkruhové konce (tlačítko). Bez něj ostrý obdélník.
+    radius?: number | 'pill';
+    // Měkký stín pod pruhem (tlačítko pak „sedí“ nad fotkou, ne nalepené).
+    shadow?: { opacity?: number; blur?: number; offsetY?: number };
   };
+  // Měkký stín pod písmem: čitelnost nad fotkou bez šedého přechodu přes obraz.
+  textShadow?: { opacity?: number; blur?: number; offsetY?: number; color?: string };
 };
 
 export type Concept = {
@@ -77,7 +88,13 @@ export type Concept = {
   getReference?: (f: Format) => string | null; // absolutní cesta k jedné fotce nebo null
   getReferences?: (f: Format) => string[]; // víc reference fotek (např. ukázkové bannery)
   logo?: LogoSpec; // NOVÉ (opt-in) — logo se složí kódem po generaci
-  overlays?: TextOverlay[]; // NOVÉ (opt-in) — texty skládané kódem po generaci
+  // Texty skládané kódem po generaci. Funkce = jiná sazba pro každý formát (Stories mají safe zónu).
+  overlays?: TextOverlay[] | ((f: Format) => TextOverlay[]);
+  // Kam posunout ořez, když se formát skládá z obrázku jiného formátu (0 = vlevo, 0.5 = střed, 1 = vpravo).
+  fokusX?: number;
+  // Banner „od grafika“ BEZ obrazové AI: pozadí, tvary, skutečná fotka produktu, logo a hvězdy skládá kód
+  // (lib/grafik.ts). Text dál přes `overlays`. Runner AI nevolá, podklad uloží do `_raw/` (relayout, video).
+  grafik?: import('./lib/grafik').GrafikSpec | ((f: Format) => import('./lib/grafik').GrafikSpec);
   /**
    * Slug jiného konceptu, jehož surový obrázek (bez textu, `_raw/`) se použije. AI se nevolá,
    * jen se složí jiný text. Pro test claimů (stejný obrázek, liší se jen nadpis) a pro
@@ -90,3 +107,8 @@ export type Config = {
   outDir: string;
   concepts: Concept[];
 };
+
+/** Texty konceptu pro daný formát (pole, nebo funkce podle formátu). */
+export function overlaysFor(c: Concept, f: Format): TextOverlay[] {
+  return typeof c.overlays === 'function' ? c.overlays(f) : (c.overlays ?? []);
+}

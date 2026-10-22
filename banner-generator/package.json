@@ -1,7 +1,7 @@
 {
   "name": "banner-generator",
   "version": "1.0.0",
-  "description": "AI banner generátor (Meta, Google Ads, Sklik) — Gemini (výchozí) + volitelně OpenAI gpt-image-2 + puppeteer",
+  "description": "AI banner generátor (Meta, Google Ads, Sklik) — Gemini Nano Banana 2.1 (výchozí) + volitelně OpenAI GPT Image 2.5 + puppeteer",
   "private": true,
   "scripts": {
     "mp4": "npx tsx banner-to-mp4.ts",

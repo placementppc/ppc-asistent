@@ -131,3 +131,20 @@ ať hlídač a další vyhodnocení ví, s čím porovnávat.
   Necommituj je do veřejného repozitáře.
 - Cizí rozpracované změny v configu nepřepisuj, založ nový config se sufixem (`-v2`).
 - Logo a text nikdy do AI promptu. Logo = `logo`, text = `overlays` v configu.
+- **Sazba vždy přes `lib/sazba.ts`** (`S.nadpis`, `S.pod`, `S.cta`, `S.stitek`): čistý text přímo na klidné
+  ploše fotky (AI ji v promptu nechá volnou), sevřený nadpis ExtraBold, podnadpis min. 32 px, CTA pilulka se
+  stínem, okraj 80 px. Žádné bubliny/karty, šedé přechody, světlá záře kolem písma ani ostré pruhy (amatérské).
+  Text, který padne na rušné místo, posuň (`--relayout`), nezakrývej ho plochou.
+- **Stories/Reels 1080×1920:** `overlays` jako funkce formátu (`f => f.height > 1500 ? […] : […]`), obsah jen
+  v safe zóně y 0.17–0.82. Chybí-li podklad 9:16, runner ho při `--relayout` složí ořezem ze stejného obrázku
+  (`fokusX` posune ořez). Když pak text padne na rušné místo, přeskládej obrázek AI na 9:16 (reference = `_raw/`).
+- **Sada „od grafika“ (bez obrazové AI):** koncept s polem `grafik` (`lib/grafik.ts`) složí kód: pozadí a tvary,
+  SKUTEČNÁ fotka produktu se stínem, logo (`brand/logo*.png`), hvězdy hodnocení, kolečko se slevou. Text přes
+  `overlays` (`S.nadtitulek`, `S.nadpis`, `S.pod`, `S.fakt`, `S.cta`). Jen skutečná data z webu (hodnocení, fakta
+  ze stránky produktu), nic nevymýšlet. Vzor: `configs/ukazka-grafik.ts`. Spouští se stejně (`generate:gemini`),
+  AI se nevolá a nic to nestojí. Každý banner jiné rozvržení (produkt v kruhu, velké číslo, přeškrtnutý seznam).
+- **Video z banneru:** `generate:gemini … --format=1080x1920 --relayout --layers` uloží čisté vrstvy do `_layers/`
+  a `animate … --layers` je použije (žádné odmaskování přes Gemini, žádné ošklivé okraje). Viz skill `animate`.
+- **Etiketa produktu:** do promptu napiš doslova text etikety (z brand manuálu) a po generaci ji přibliž.
+  AI drobný text na etiketě komolí (DOPLAËX, 50 KAPSLÍ); vadný obrázek přegeneruj.
+- Náhled více bannerů v jednom obrázku nikdy neukládej mezi hotové bannery (plete se s kreativou).

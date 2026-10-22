@@ -1,7 +1,8 @@
 # Banner Generátor
 
 Podsložka appky PPC asistent. Vyrábí reklamní bannery (PNG + MP4) pro Meta Ads, Google Ads a Sklik.
-Obrázky generuje **Gemini** (výchozí), volitelně **OpenAI** (`gpt-image-2`). Text a logo skládá kód.
+Obrázky generuje **Gemini** (výchozí, `gemini-nano-banana-2.1`), volitelně **OpenAI** (`gpt-image-2.5-sunburst`).
+Text a logo skládá kód.
 
 Z kořene appky se sem chodí přes skill **`bannery`** (ten tyhle pravidla načte celá).
 Před prvním konceptem musí existovat **schválený** `banners-<klient>/BRAND-MANUAL.md`
@@ -125,6 +126,20 @@ Engine proto generuje **jen obraz**; nadpis, cenu, CTA a logo skládá **kódem*
 Když koncept používá `overlays`/`logo`, jeho `buildPrompt()` musí AI zakázat kreslit tyto prvky:
 `"DO NOT render any logo or headline text — leave clean space for it."`
 
+### Profi sazba (`lib/sazba.ts`)
+
+Text na banner skládej přes `sazba()` z `lib/sazba.ts`: `S.nadpis` (sevřený ExtraBold, `role: 'head'` pro video),
+`S.pod` (podnadpis/tvrzení, min. 32 px), `S.cta` (pilulka se stínem), `S.stitek` (BF štítek). Čistý text na klidné
+ploše fotky, okraj 80 px. Žádné bubliny, šedé přechody, záře ani ostré pruhy. Stories: `overlays` jako funkce
+formátu, safe zóna y 0.17–0.82; chybějící 9:16 podklad se při `--relayout` složí ořezem (`fokusX`).
+Video: `--layers` (generátor uloží vrstvy) + `animate --layers`. Vzor: `configs/ukazka-black-friday.ts`.
+
+### Sada „od grafika“ (`lib/grafik.ts`, bez AI)
+
+Koncept s polem `grafik` (pozadí, tvary, skutečná fotka produktu se stínem, logo, hvězdy, kolečko se slevou)
+skládá kód, AI se nevolá. Text přes `overlays` a `lib/sazba.ts` (`S.nadtitulek`, `S.fakt` = bílý štítek s faktem,
+`preskrtnuti` = přeškrtnutý řádek). Jen skutečná data z webu klienta. Vzor: `configs/ukazka-grafik.ts`.
+
 ## Gemini vs. OpenAI
 
 Oba runnery čtou **stejný config**. Výchozí je Gemini. OpenAI spouštěj jen když má uživatel klíč a chce srovnání:
@@ -142,14 +157,18 @@ OpenAI vyžaduje rozměry dělitelné 16: runner generuje 1088× a zmenší na 1
 
 ## Gemini API
 
-- **Model v kódu:** `gemini-3.1-flash-image` (`generate-banners.ts`). `animate-banner.ts` volá
-  `gemini-3.1-flash-image-preview` přes `v1beta`. Názvy modelů se mění: když API vrátí 404, ověř aktuální
-  název v dokumentaci Gemini API (stránka Image generation) a uprav konstantu `MODEL` v souboru.
+- **Modely:** seznam v `lib/modely.ts` (`GEMINI_MODELY`): nejnovější `gemini-nano-banana-2.1` (GA 6. 10. 2026),
+  pojistka `gemini-3.1-flash-image`. Když API model nezná (404), runner sám přepne na další. Volá se `v1beta`
+  (Nano Banana 2.1 na `v1` vrací 404, ověřeno 22. 10. 2026). Jiný model: `--model=…`, třeba
+  `--model=gemini-3-pro-image` na prémiovou kvalitu. Platí pro `generate-banners.ts` i `animate-banner.ts`.
+  Názvy modelů se mění: nový přidej na začátek seznamu v `lib/modely.ts`.
 - **Klíč:** `.env.local` → `GEMINI_API_KEY` (Google AI Studio).
 
 ## OpenAI API (volitelné)
 
-- **Model:** `gpt-image-2` — bez reference `images/generations`, s referenční fotkou `images/edits`.
+- **Modely:** `lib/modely.ts` (`OPENAI_MODELY`): `gpt-image-2.5-sunburst` (nejschopnější, i úpravy podle fotky),
+  pojistka `gpt-image-2`. Rychlejší a levnější: `--model=gpt-image-2.5-flare`. Bez reference
+  `images/generations`, s referenční fotkou `images/edits`. Rozměry v násobcích 16 (1080 → 1088).
 - **Klíč:** `.env.local` → `OPENAI_API_KEY` (platform.openai.com → API keys).
 - Organizace v OpenAI musí být ověřená (Verify organization), jinak API vrací 403
   (zkušenost z provozu; před prvním použitím ověř v dokumentaci OpenAI).

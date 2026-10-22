@@ -18,6 +18,19 @@ Výsledek: `*_animated.mp4` vedle původního PNG.
 
 Nebo prostě řekni Claudovi: **„rozhýbej tenhle banner"** / **„udělej z toho video"** (skill `animate` v kořeni appky, `.claude/skills/animate/`).
 
+## Bannery z banner-generátoru: `--layers` (doporučeno)
+
+Banner složený kódem má čistý podklad v `_raw/` i přesný text. Místo odmaskování přes Gemini ulož vrstvy:
+
+```bash
+npm run generate:gemini -- <config> --only=BF1 --format=1080x1920 --relayout --layers   # → _layers/
+npm run animate -- "banners-<klient>/<banner>_1080x1920.png" --layers --glint --glint-rect=0.55,0.64,0.83,0.94 --duration=6 --name=jemna
+npm run animate -- "banners-<klient>/<banner>_1080x1920.png" --layers --slam --duration=6 --name=vyrazna
+```
+
+Hrany písma, stíny i tlačítko jsou v animaci přesně jako v banneru. `--slam` na 9:16 nadpis nezvětšuje
+(spadne shora, dosedne, odskočí). Štítek s nabídkou a CTA stojí od prvního snímku.
+
 ## Jak to funguje
 
 1. **Gemini** odstraní z banneru všechen text → čisté pozadí (`*_anim-plate.png`).

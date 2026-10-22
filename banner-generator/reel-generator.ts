@@ -17,6 +17,7 @@
 import puppeteer from 'puppeteer';
 import sharp from 'sharp';
 import { execFileSync } from 'child_process';
+import { OPENAI_MODELY, modelyZArgumentu, neznamyModel } from './lib/modely';
 import { createRequire } from 'module';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -76,7 +77,7 @@ function openaiKey(): string {
   return key;
 }
 
-/** Pozadí generujeme v 1088×1920 (gpt-image-2 chce násobky 16) a zmenšíme na 1080×1920. */
+/** Pozadí generujeme v 1088×1920 (gpt-image-2 a 2.5 chtějí násobky 16) a zmenšíme na 1080×1920. */
 async function generateScenes(cfg: ReelConfig) {
   const assetsDir = path.join(cfg.outDir, '_assets');
   fs.mkdirSync(assetsDir, { recursive: true });
@@ -85,19 +86,27 @@ async function generateScenes(cfg: ReelConfig) {
     const out = path.join(assetsDir, `${scene.file}.png`);
     if (fs.existsSync(out)) { console.log(`   ↩︎ ${scene.file}.png už existuje`); continue; }
     console.log(`   🎨 generuji ${scene.file}…`);
-    const res = await fetch('https://api.openai.com/v1/images/generations', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'gpt-image-2',
-        prompt: scene.prompt,
-        n: 1,
-        size: '1088x1920',
-        quality: 'high',
-        output_format: 'png',
-      }),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 500)}`);
+    // Nejnovější model s pojistkou (lib/modely.ts): když ho API nezná, zkusí další v seznamu.
+    let res: Response | null = null;
+    for (const model of modelyZArgumentu(args, OPENAI_MODELY)) {
+      res = await fetch('https://api.openai.com/v1/images/generations', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model,
+          prompt: scene.prompt,
+          n: 1,
+          size: '1088x1920',
+          quality: 'high',
+          output_format: 'png',
+        }),
+      });
+      if (res.ok) break;
+      const txt = await res.text();
+      if (!neznamyModel(res.status, txt)) throw new Error(`HTTP ${res.status}: ${txt.slice(0, 500)}`);
+      console.warn(`   ⚠️  Model ${model} API nezná, zkouším další.`);
+    }
+    if (!res?.ok) throw new Error('Žádný z obrazových modelů OpenAI API nepřijalo.');
     const json: any = await res.json();
     const buf = Buffer.from(json.data[0].b64_json, 'base64');
     await sharp(buf).resize(1080, 1920, { fit: 'cover' }).png().toFile(out);

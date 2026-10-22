@@ -18,6 +18,21 @@ Engine: `banner-generator/animate-banner.ts` (z kořene appky `npm --prefix bann
 3. **HTML wrapper** (auto): pozadí stojí, textová vrstva přiletí + ambient efekty.
 4. **puppeteer + ffmpeg** → `*_animated.mp4` vedle původního PNG.
 
+## Bannery z banner-generátoru: vždy `--layers` (čisté okraje)
+
+Když banner vznikl v banner-generátoru (text skládá kód), neodmaskovávej text přes Gemini. Vrstvy ulož přímo:
+
+```bash
+npm --prefix banner-generator run generate:gemini -- <config> --only=<ID> --format=1080x1920 --relayout --layers
+# jemná: nadpis přiletí + přejezd světla jen přes produkt
+npm --prefix banner-generator run animate -- "banners-<klient>/<banner>_1080x1920.png" --layers --glint --glint-rect=l,t,r,b --duration=6 --name=jemna
+# výrazná: nadpis přiletí a bouchne (na 9:16 bez zvětšování: spadne a odskočí), nabídka je vidět celou dobu
+npm --prefix banner-generator run animate -- "banners-<klient>/<banner>_1080x1920.png" --layers --slam --duration=6 --name=vyrazna
+```
+
+Nadpis = overlay s `role: 'head'` (dělá ho `S.nadpis`), přiletí; zbytek (štítek s nabídkou, podnadpis, CTA) stojí
+od prvního snímku. Kontrola: první, prostřední a poslední snímek každého videa (ffmpeg `-ss`), ukázat uživateli.
+
 ## Postup
 
 1. **Najdi banner(y).** Pokud uživatel dá konkrétní cestu k PNG, použij ji. Pokud řekne jen projekt/koncept ("rozhýbej čtyřku z jarní sady"), najdi přes Glob odpovídající `banner-generator/banners-*/**/*_banner_*.png` a potvrď, který soubor bereš.
@@ -52,6 +67,9 @@ Engine: `banner-generator/animate-banner.ts` (z kořene appky `npm --prefix bann
 | `--head-rect=l,t,r,b` | auto | obdélník nadpisu (podíly), nutné u dvousloupcových bannerů (nadpis vlevo, další text vpravo) |
 | `--head-band=a,b` | auto | jen pás řádků nadpisu (přes celou šířku) |
 | `--all-text` | — | starý režim: přiletí všechen text najednou |
+| `--layers` | — | vrstvy z generátoru (`_layers/`, vzniknou přes `generate:gemini … --layers`) místo odmaskování: čisté okraje, bez Gemini |
+| `--glint-rect=l,t,r,b` | — | přejezd světla jen přes obdélník (podíly), typicky přes produkt |
+| `--name=jemna` | — | název verze ve výstupu: `<banner>_animated-jemna.mp4` (víc verzí vedle sebe) |
 
 ## Který text se animuje
 
@@ -59,7 +77,8 @@ Default se **automaticky najde hlavní nadpis** (blok s největším písmem) a 
 
 ## Pravidla
 
-- **Žádný zoom/scale na Stories** (9:16) — skript text posouvá jen translateY, nikdy nescaluje. Ambient efekty jsou jen fade/shimmer/glow/sparkles (soulad s pravidlem 9 v `banner-generator/CLAUDE.md`).
+- **Žádný zoom/scale na Stories** (9:16) — skript text posouvá jen translateY, nikdy nescaluje. `--slam` na 9:16
+  nadpis nezvětšuje: spadne shora, dosedne a odskočí (jen posun). Ambient efekty jsou jen fade/shimmer/glow/sparkles (soulad s pravidlem 9 v `banner-generator/CLAUDE.md`).
 - **Vždy zkontroluj odmaskovaný text** než video předáš — Gemini občas u členitého pozadí nechá artefakty na hranách. Lepší `--no-text` než ošklivé okraje.
 - Komunikuj česky.
 - Když uživatel dá víc bannerů, zpracuj je popořadě a na konci vypiš seznam vzniklých MP4.

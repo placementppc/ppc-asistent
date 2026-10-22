@@ -18,8 +18,9 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
-import type { Concept, Config, Format, TextOverlay } from '../banner-formats';
+import type { Concept, Config, Format } from '../banner-formats';
 import { nativeStaticStyle, NATIVE_STATIC_RULES } from '../lib/native-static';
+import { sazba } from '../lib/sazba';
 
 const DIR = path.resolve('banners-ukazka');
 const PHOTO = path.join(DIR, 'kavovar_transparent.png');
@@ -37,15 +38,9 @@ const KONEC = (f: Format) => `TECHNICAL RULES:
 - DO NOT render any text, logo, price, discount or button.
 - Edge-to-edge, no frames. Output exactly ${f.width}x${f.height} pixels.`;
 
-const pruh = (text: string, yPct: number, bg: string, fg = C.bila, size = 40): TextOverlay =>
-  fs.existsSync(FONT)
-    ? { lines: [text], xPct: 0.07, yPct, fontSize: size, color: fg, weight: 800, ...font,
-        band: { color: bg, padXPct: 0.04, padYPct: 0.02 } }
-    : { lines: [text], xPct: 0.07, yPct, fontSize: size + 6, color: bg, weight: 900 };
-const nadpis = (lines: string[], yPct: number, color = C.espresso, size = 72): TextOverlay =>
-  ({ lines, xPct: 0.07, yPct, fontSize: size, lineHeight: 1.08, color, weight: 800, ...font });
-const pod = (lines: string[], yPct: number, color = C.espresso): TextOverlay =>
-  ({ lines, xPct: 0.07, yPct, fontSize: 34, lineHeight: 1.25, color, weight: 500, ...font });
+// Profi sazba (lib/sazba.ts): velký nadpis bez šedého přechodu, podnadpis v bílé zaoblené kartě,
+// CTA jako pilulka se stínem, okraj 80 px. Ostré pruhy a šedé přechody přes fotku působí amatérsky.
+const S = sazba({ ...font, ink: C.espresso, cta: C.oranz });
 
 // T1 — profi lifestyle foto
 // PERSONA: dojíždějící do práce · ÚHEL: pain-point · BUŇKA: dojíždějící × pain-point × designed-static
@@ -57,7 +52,8 @@ SCENE: early morning kitchen counter, warm window light, the machine pouring a s
 keys and a work bag in soft focus. Cream ${C.krem} and espresso brown ${C.espresso} tones.
 COMPOSITION: upper 40% calm and bright for text, bottom 12% calm.
 ${KONEC(f)}`,
-  overlays: [nadpis(['Kafe z automatu', 'chutná jako pondělí?'], 0.08), pruh('Vybrat kávovar', 0.88, C.oranz)],
+  overlays: [S.nadpis(['Kafe z automatu', 'chutná jako pondělí?'], 0.06, 78),
+    S.pod(['Espresso doma jedním tlačítkem.'], 0.215), S.cta('Vybrat kávovar')],
 };
 
 // T2 — UGC fotka z mobilu (native-static NS5)
@@ -71,10 +67,7 @@ ${nativeStaticStyle('NS5', {
   })}
 ${NATIVE_STATIC_RULES}
 ${KONEC(f)}`,
-  overlays: [
-    { lines: ['Bojíte se páky?', 'Stačí jedno tlačítko.'], xPct: 0.07, yPct: 0.07, fontSize: 60, lineHeight: 1.1,
-      color: C.bila, weight: 800, ...font, scrim: { from: 'top', heightPct: 0.4, opacity: 0.55 } },
-  ],
+  overlays: [S.nadpis(['Bojíte se páky?', 'Stačí jedno tlačítko.'], 0.06, 80, C.bila), S.cta('Vybrat kávovar')],
 };
 
 // T3 — ručně psaný seznam úkolů na lince (native-static NS7: sdělení v reálném kontextu)
@@ -97,8 +90,8 @@ ${KONEC(f)}`,
     { lines: ['Pondělí'], xPct: 0.12, yPct: 0.2, fontSize: 60, color: '#1d3a8a', weight: 700, ...ruka },
     { lines: ['– call v 8:30', '– odpovědět na maily', '– zajít si pro kafe', '– zase zajít si pro kafe'],
       xPct: 0.12, yPct: 0.29, fontSize: 42, lineHeight: 1.4, color: '#1d3a8a', weight: 500, ...ruka },
-    { lines: ['Pracujete z domu a kafe si chodíte kupovat ven?'], xPct: 0.05, yPct: 0.035, fontSize: 36, color: C.bila,
-      weight: 800, ...font, scrim: { from: 'top', heightPct: 0.12, opacity: 0.55 } },
+    S.nadpis(['Pracujete z domu a kafe', 'si chodíte kupovat ven?'], 0.03, 44, C.bila),
+    S.cta('Vybrat kávovar'),
   ],
 };
 
@@ -107,9 +100,9 @@ const vitez = { T1, T2, T3 }[VITEZ] as Concept;
 // BF1 — vítěz se škáluje nabídkou: stejný obrázek (podklad), AI se nevolá
 const BF1: Concept = {
   id: 'BF1', slug: 'bf-blackfriday', buildPrompt: vitez.buildPrompt, getReference: ref, podklad: vitez.slug,
-  overlays: [pruh(`BLACK FRIDAY ${NABIDKA.sleva}`, 0.05, C.espresso),
-    ...(vitez.overlays ?? []).map(o => ({ ...o, yPct: o.yPct < 0.8 ? o.yPct + 0.07 : o.yPct }))
-      .map(o => (o.band ? { ...o, lines: [`Koupit se slevou · ${NABIDKA.termin}`] } : o))],
+  overlays: [S.stitek(`BLACK FRIDAY ${NABIDKA.sleva} · ${NABIDKA.termin}`, 0.035, C.espresso),
+    ...(vitez.overlays ?? []).filter(o => o.yPct < 0.8).map(o => ({ ...o, yPct: o.yPct + 0.07 })),
+    S.cta('Koupit se slevou')],
 };
 
 // BF2 — Cyber Monday jako post-it (native-static NS4: slevy, krátká pobídka)
@@ -122,7 +115,7 @@ ${nativeStaticStyle('NS4', {
   })}
 ${NATIVE_STATIC_RULES}
 ${KONEC(f)}`,
-  overlays: [{ ...nadpis(['Poslední den', NABIDKA.sleva], 0.2, C.espresso, 62), xPct: 0.24 }],
+  overlays: [S.nadpis(['Poslední den', NABIDKA.sleva], 0.2, 62, C.espresso, 0.24), S.cta('Vybrat kávovar')],
 };
 
 // V1 — Vánoce: dárková fotka, bez slevy
@@ -133,9 +126,9 @@ PRODUCT: ${PRODUKT}
 SCENE: the machine with a simple red ribbon and a blank paper gift tag, cozy living room, blurred tree lights.
 COMPOSITION: upper 45% calm dark-warm blurred background for text.
 ${KONEC(f)}`,
-  overlays: [{ ...nadpis(['Dárek pro toho,', 'kdo ráno nestíhá.'], 0.13, C.bila, 70),
-      scrim: { from: 'top', heightPct: 0.55, opacity: 0.65 } },
-    pruh('Doručíme do Vánoc', 0.05, C.oranz), pruh('Vybrat dárek', 0.88, C.oranz)],
+  overlays: [S.stitek('Doručíme do Vánoc', 0.05, C.oranz),
+    S.nadpis(['Dárek pro toho,', 'kdo ráno nestíhá.'], 0.12, 70, C.bila),
+    S.cta('Vybrat dárek')],
 };
 
 const config: Config = { outDir: 'banners-ukazka', concepts: [T1, T2, T3, BF1, BF2, V1] };

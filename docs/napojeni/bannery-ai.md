@@ -11,8 +11,8 @@ Generátor bannerů je samostatný Node projekt. Klíče čte **jen** ze souboru
 
 | Proměnná | Pro | Povinná |
 |---|---|---|
-| `GEMINI_API_KEY` | `npm run generate:gemini` (model `gemini-3.1-flash-image`) | ano |
-| `OPENAI_API_KEY` | `npm run generate:openai` (model `gpt-image-2`) | ne |
+| `GEMINI_API_KEY` | `npm run generate:gemini` (model `gemini-nano-banana-2.1`, záloha `gemini-3.1-flash-image`) | ano |
+| `OPENAI_API_KEY` | `npm run generate:openai` (model `gpt-image-2.5-sunburst`, záloha `gpt-image-2`) | ne |
 
 ## Co potřebuješ
 
@@ -35,8 +35,8 @@ Generátor bannerů je samostatný Node projekt. Klíče čte **jen** ze souboru
    Google doporučuje klíč **omezit** jen na Gemini API (v AI Studiu u klíče) a nikdy ho
    nedávat do Gitu ani do kódu na webu.
 4. **OpenAI klíč (volitelně)**: platform.openai.com/api-keys → vytvoř klíč. Vlož jako
-   `OPENAI_API_KEY="…"`. Podle poznámky v `banner-generator/.env.example` vyžaduje model
-   `gpt-image-2` ověřenou organizaci (Settings → Organization → Verify). **Neověřeno**
+   `OPENAI_API_KEY="…"`. Podle poznámky v `banner-generator/.env.example` vyžadují obrazové
+   modely GPT Image ověřenou organizaci (Settings → Organization → Verify). **Neověřeno**
    v dokumentaci OpenAI.
 
 ## Ověření
@@ -57,7 +57,7 @@ obrázek, potvrdí až první banner přes skill `bannery` (stojí pár korun).
 | „GEMINI_API_KEY nenalezen" | prázdný nebo špatně pojmenovaný řádek | krok 3, název přesně `GEMINI_API_KEY` |
 | HTTP 400 / 403 od Gemini | klíč neplatný nebo omezený na jiné API | nový klíč, omez ho na Gemini API |
 | HTTP 429 | vyčerpaný limit (bezplatná úroveň má nízké limity) | počkej, nebo zapni placení v AI Studiu |
-| OpenAI 403 u `gpt-image-2` | organizace není ověřená | ověř organizaci, nebo zůstaň u Gemini |
+| OpenAI 403 u modelů GPT Image | organizace není ověřená | ověř organizaci, nebo zůstaň u Gemini |
 
 ## Než začneš dělat bannery
 

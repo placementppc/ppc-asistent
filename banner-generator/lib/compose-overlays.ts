@@ -48,12 +48,30 @@ export async function compositeText(
     const top = Math.round(H * ov.yPct);
 
     // Text přes celé plátno: co přeteče přes okraj, se ořízne (sharp nesloží vrstvu větší než banner).
+    // přeškrtnutí: čára ve výšce poloviny malých písmen (účaří − 0,27 em)
+    const strike = ov.preskrtnuti
+      ? `<rect x="${left - 6}" y="${Math.round(top + block.baseline - ov.fontSize * 0.29)}" width="${tw + 12}" ` +
+        `height="${ov.preskrtnuti.width ?? Math.max(4, Math.round(ov.fontSize * 0.075))}" rx="3" fill="${escapeXml(ov.preskrtnuti.color ?? color)}"/>`
+      : '';
     const textBuf = Buffer.from(
       `<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">` +
         `<g transform="translate(${left} ${top})" fill="${escapeXml(color)}">` +
         block.paths.map(d => `<path d="${d}"/>`).join('') +
-        `</g></svg>`,
+        `</g>${strike}</svg>`,
     );
+
+    // Měkký stín pod písmem (rozmazaná kopie textu), kreslí se pod text.
+    const layers: sharp.OverlayOptions[] = [];
+    if (ov.textShadow) {
+      const ts = ov.textShadow;
+      const shadowSvg = Buffer.from(
+        `<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">` +
+          `<g transform="translate(${left} ${top + (ts.offsetY ?? 3)})" fill="${ts.color ?? '#000'}" fill-opacity="${ts.opacity ?? 0.45}">` +
+          block.paths.map(d => `<path d="${d}"/>`).join('') +
+          `</g></svg>`,
+      );
+      layers.push({ input: await sharp(shadowSvg).blur(Math.max(0.3, ts.blur ?? 8)).png().toBuffer(), left: 0, top: 0 });
+    }
 
     // Plný pruh pod textem — kreslí se PŘED textem, aby písmo zůstalo ostré.
     if (ov.band) {
@@ -65,21 +83,26 @@ export async function compositeText(
       let bandH = Math.min(H - bandTop, th + padY * 2);
       if (ov.band.toEdge === 'bottom') bandH = H - bandTop;
       else if (ov.band.toEdge === 'top') { bandH = bandTop + bandH; bandTop = 0; }
+      const r = ov.band.radius === 'pill' ? bandH / 2 : (ov.band.radius ?? 0);
       const rect = Buffer.from(
         `<svg width="${bandW}" height="${bandH}" xmlns="http://www.w3.org/2000/svg">` +
-          `<rect width="${bandW}" height="${bandH}" fill="${ov.band.color}" ` +
+          `<rect width="${bandW}" height="${bandH}" rx="${r}" ry="${r}" fill="${ov.band.color}" ` +
           `fill-opacity="${ov.band.opacity ?? 1}"/></svg>`,
       );
-      return banner
-        .composite([
-          { input: rect, left: bandLeft, top: bandTop },
-          { input: textBuf, left: 0, top: 0 },
-        ])
-        .png()
-        .toBuffer();
+      if (ov.band.shadow) {
+        const sh = ov.band.shadow;
+        const shadowSvg = Buffer.from(
+          `<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">` +
+            `<rect x="${bandLeft}" y="${bandTop + (sh.offsetY ?? 8)}" width="${bandW}" height="${bandH}" rx="${r}" ry="${r}" ` +
+            `fill="#000" fill-opacity="${sh.opacity ?? 0.3}"/></svg>`,
+        );
+        layers.unshift({ input: await sharp(shadowSvg).blur(Math.max(0.3, sh.blur ?? 14)).png().toBuffer(), left: 0, top: 0 });
+      }
+      layers.push({ input: rect, left: bandLeft, top: bandTop });
     }
 
-    return banner.composite([{ input: textBuf, left: 0, top: 0 }]).png().toBuffer();
+    layers.push({ input: textBuf, left: 0, top: 0 });
+    return banner.composite(layers).png().toBuffer();
   }
 
   // --- Větev B: systémový font přes SVG ---
@@ -175,4 +198,22 @@ export async function applyOverlays(
     out = await compositeLogo(out, opts.logo, opts.isStories);
   }
   return out;
+}
+
+/**
+ * Vrstvy pro video (animate-banner --layers): nadpis (role 'head') a zbytek textu zvlášť,
+ * každá na průhledném plátně. Hrany písma jsou přesně jako v banneru, žádné odmaskování
+ * z rozdílu obrázků (to dělá kolem stínů a karet ošklivé okraje).
+ */
+export async function renderLayers(
+  W: number,
+  H: number,
+  opts: { overlays?: TextOverlay[]; logo?: LogoSpec; isStories: boolean },
+): Promise<{ head: Buffer; rest: Buffer }> {
+  const empty = await sharp({ create: { width: W, height: H, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+    .png().toBuffer();
+  const all = opts.overlays ?? [];
+  const head = await applyOverlays(empty, { overlays: all.filter(o => o.role === 'head'), isStories: opts.isStories });
+  const rest = await applyOverlays(empty, { overlays: all.filter(o => o.role !== 'head'), logo: opts.logo, isStories: opts.isStories });
+  return { head, rest };
 }

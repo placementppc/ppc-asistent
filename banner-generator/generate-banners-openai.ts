@@ -1,5 +1,5 @@
 /**
- * Batch generátor bannerů přes OpenAI gpt-image-2 API.
+ * Batch generátor bannerů přes OpenAI GPT Image 2.5 Sunburst (pojistka gpt-image-2, viz lib/modely.ts).
  *
  * Sourozenec generate-banners.ts (Gemini). Sdílí stejné configs/<jméno>.ts —
  * tj. stejné koncepty, prompty a reference fotky. Liší se jen volaným API.
@@ -11,7 +11,7 @@
  *
  * Výstup jde do <config.outDir>/ s prefixem openai_, takže nepřepíše Gemini výstup (gemini_).
  *
- * Pozn. k rozměrům: gpt-image-2 vyžaduje rozměry dělitelné 16. Generujeme
+ * Pozn. k rozměrům: GPT Image vyžaduje rozměry dělitelné 16. Generujeme
  * v nejbližším vyšším násobku 16 (1088×1088, 1088×1920, 1088×1360) a sharp
  * downsamplujeme na finální 1080×1080 / 1080×1920 / 1080×1350.
  */
@@ -19,8 +19,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import sharp from 'sharp';
-import { FORMATS, type Config, type Concept, type Format } from './banner-formats';
+import { FORMATS, type Config, type Concept, type Format, overlaysFor } from './banner-formats';
 import { applyOverlays } from './lib/compose-overlays';
+import { OPENAI_MODELY, modelyZArgumentu, neznamyModel } from './lib/modely';
 
 const args = process.argv.slice(2);
 const configName = args.find(a => !a.startsWith('--'));
@@ -50,13 +51,16 @@ if (!apiKey) {
   process.exit(1);
 }
 
-const MODEL = 'gpt-image-2';
+// Nejnovější model s pojistkou (lib/modely.ts); vynutit jiný: --model=… (třeba gpt-image-2.5-flare)
+const MODELY = modelyZArgumentu(args, OPENAI_MODELY);
+let modelIdx = 0;
+const model = () => MODELY[modelIdx];
 const GENERATIONS_ENDPOINT = 'https://api.openai.com/v1/images/generations';
 const EDITS_ENDPOINT = 'https://api.openai.com/v1/images/edits';
 
 /**
  * Mapping cílový formát (1080×) → generační rozměr (násobek 16).
- * gpt-image-2 vyžaduje width i height dělitelné 16. 1080 není (1080/16=67.5),
+ * gpt-image-2 (a 2.5) vyžaduje width i height dělitelné 16. 1080 není (1080/16=67.5),
  * tak generujeme v 1088 a downscalujeme na 1080.
  */
 function generationSize(format: Format): { genWidth: number; genHeight: number; sizeStr: string } {
@@ -86,7 +90,7 @@ async function loadConfig(name: string): Promise<Config> {
 
 async function callGenerations(prompt: string, sizeStr: string): Promise<Buffer> {
   const body = {
-    model: MODEL,
+    model: model(),
     prompt,
     n: 1,
     size: sizeStr,
@@ -103,6 +107,11 @@ async function callGenerations(prompt: string, sizeStr: string): Promise<Buffer>
   });
   if (!res.ok) {
     const txt = await res.text();
+    if (neznamyModel(res.status, txt) && modelIdx < MODELY.length - 1) {
+      console.warn(`   ⚠️  Model ${model()} API nezná, přepínám na ${MODELY[modelIdx + 1]}.`);
+      modelIdx++;
+      return callGenerations(prompt, sizeStr);
+    }
     throw new Error(`HTTP ${res.status}: ${txt.slice(0, 600)}`);
   }
   const json: any = await res.json();
@@ -114,7 +123,7 @@ async function callGenerations(prompt: string, sizeStr: string): Promise<Buffer>
 async function callEdits(prompt: string, sizeStr: string, refPaths: string[]): Promise<Buffer> {
   // OpenAI image edits: multipart/form-data, image[] může být i víc souborů
   const form = new FormData();
-  form.append('model', MODEL);
+  form.append('model', model());
   form.append('prompt', prompt);
   form.append('n', '1');
   form.append('size', sizeStr);
@@ -140,6 +149,11 @@ async function callEdits(prompt: string, sizeStr: string, refPaths: string[]): P
   });
   if (!res.ok) {
     const txt = await res.text();
+    if (neznamyModel(res.status, txt) && modelIdx < MODELY.length - 1) {
+      console.warn(`   ⚠️  Model ${model()} API nezná, přepínám na ${MODELY[modelIdx + 1]}.`);
+      modelIdx++;
+      return callEdits(prompt, sizeStr, refPaths);
+    }
     throw new Error(`HTTP ${res.status}: ${txt.slice(0, 600)}`);
   }
   const json: any = await res.json();
@@ -181,7 +195,7 @@ async function generateOne(concept: Concept, format: Format, outDir: string): Pr
       // Dvouvrstvý render: text a logo se skládají kódem (ne přes AI), viz lib/compose-overlays.
       const isStories = format.width === 1080 && format.height === 1920;
       finalPng = await applyOverlays(finalPng, {
-        overlays: concept.overlays,
+        overlays: overlaysFor(concept, format),
         logo: concept.logo,
         isStories,
       });
@@ -217,7 +231,7 @@ async function main() {
     : FORMATS;
 
   console.log(`🎨 Banner generator — OpenAI`);
-  console.log(`   Model: ${MODEL}`);
+  console.log(`   Model: ${model()}`);
   console.log(`   Quality: ${QUALITY}`);
   console.log(`   Výstup: ${outDir}`);
   console.log(`   Koncepty: ${concepts.map(c => c.id).join(', ')}`);

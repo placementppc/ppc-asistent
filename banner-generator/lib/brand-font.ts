@@ -84,6 +84,8 @@ export type TextBlock = {
   /** Rozměr inkoustu (skutečně vybarvené plochy) celého bloku v px. */
   width: number;
   height: number;
+  /** Vzdálenost od horní hrany inkoustu k účaří prvního řádku (px). */
+  baseline: number;
 };
 
 /**
@@ -100,11 +102,13 @@ export function layoutTextBlock(opts: {
   weight?: number | string;
   fontFamily?: string;
   anchor?: 'start' | 'middle' | 'end';
+  letterSpacing?: number; // prostrkání v em (−0.02 = sevřený nadpis, 0.1 = kapitálky)
 }): TextBlock | null {
   const font = loadFont(opts.fontFile, weightToNumber(opts.weight), opts.fontFamily);
   const scale = opts.fontSize / font.unitsPerEm;
   const lineStep = opts.fontSize * (opts.lineHeight ?? 1.15);
   const anchor = opts.anchor ?? 'start';
+  const track = (opts.letterSpacing ?? 0) * opts.fontSize;
 
   const outlines: Path[] = [];
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -121,7 +125,7 @@ export function layoutTextBlock(opts: {
     }
 
     const run = font.layout(line);
-    const advance = run.advanceWidth * scale;
+    const advance = run.advanceWidth * scale + track * Math.max(0, run.glyphs.length - 1);
     let penX = anchor === 'middle' ? -advance / 2 : anchor === 'end' ? -advance : 0;
     const baseline = i * lineStep;
 
@@ -137,7 +141,7 @@ export function layoutTextBlock(opts: {
         maxX = Math.max(maxX, bb.maxX); maxY = Math.max(maxY, bb.maxY);
         outlines.push(path);
       }
-      penX += pos.xAdvance * scale;
+      penX += pos.xAdvance * scale + track;
     });
   });
 
@@ -146,5 +150,6 @@ export function layoutTextBlock(opts: {
     paths: outlines.map(p => p.translate(-minX, -minY).toSVG()),
     width: maxX - minX,
     height: maxY - minY,
+    baseline: -minY,
   };
 }
